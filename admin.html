@@ -3,609 +3,344 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PawForward | Admin Dashboard</title>
+    <title>PawForward | Admin Command Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Palette */
             --red: #b63737;
             --red-dark: #902424;
             --gold: #d9a323;
             --cream: #fdfaf5;
             --ink: #2d2424;
             --muted: #7a6e6e;
-            --line: rgba(182, 55, 55, 0.1);
-            
-            /* Glassmorphism / Claymorphism Base */
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --glass-blur: blur(12px);
-            --clay-shadow: 8px 8px 16px rgba(0, 0, 0, 0.05), -8px -8px 16px rgba(255, 255, 255, 0.8);
-            --clay-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.5);
-            
+            --line: rgba(182, 55, 55, 0.12);
+            --glass-bg: rgba(255, 255, 255, 0.78);
+            --glass-border: rgba(255, 255, 255, 0.65);
+            --glass-blur: blur(16px);
+            --clay-shadow: 10px 14px 28px rgba(182, 55, 55, 0.08), -6px -6px 16px rgba(255, 255, 255, 0.9);
+            --clay-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.6);
             --bg: var(--cream);
             --surface: #ffffff;
             --field: #f3eee7;
-            --blush: rgba(182, 55, 55, 0.05);
-            --primary-glow: rgba(182, 55, 55, 0.2);
+            --blush: rgba(182, 55, 55, 0.06);
+            --primary-glow: rgba(182, 55, 55, 0.25);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="dark"] {
-            --bg: #1a1616;
-            --surface: #251f1f;
+            --bg: #161111;
+            --surface: #221a1a;
             --ink: #fdfaf5;
             --muted: #b5a4a4;
-            --field: #2d2424;
-            --glass-bg: rgba(37, 31, 31, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.05);
-            --clay-shadow: 8px 8px 20px rgba(0, 0, 0, 0.3), -4px -4px 15px rgba(255, 255, 255, 0.02);
-            --clay-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.2), inset -1px -1px 2px rgba(255, 255, 255, 0.05);
-            --line: rgba(255, 255, 255, 0.05);
-            --blush: rgba(182, 55, 55, 0.15);
+            --field: #2d2323;
+            --glass-bg: rgba(34, 26, 26, 0.84);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --clay-shadow: 8px 10px 24px rgba(0, 0, 0, 0.45), -4px -4px 12px rgba(255, 255, 255, 0.03);
+            --clay-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.35);
+            --line: rgba(255, 255, 255, 0.08);
+            --blush: rgba(182, 55, 55, 0.16);
         }
 
         * { box-sizing: border-box; }
-
         body {
             margin: 0;
-            font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+            font-family: 'Montserrat', system-ui, sans-serif;
             background: var(--bg);
             color: var(--ink);
             min-height: 100dvh;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(182, 55, 55, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(217, 163, 35, 0.05) 0px, transparent 50%);
-            background-attachment: fixed;
         }
 
-        /* Layout Structure */
-        .admin-layout {
-            display: flex;
-            min-height: 100dvh;
+        /* Security Verification Screen (Prevents Flash & Redirect Loops) */
+        #securityShield {
+            position: fixed; inset: 0; z-index: 5000;
+            background: var(--bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 16px; text-align: center; padding: 24px;
+            transition: opacity 0.35s ease;
         }
+        .spinner {
+            width: 48px; height: 48px; border-radius: 50%;
+            border: 4px solid var(--blush); border-top-color: var(--red);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Sidebar */
+        .admin-layout { display: flex; min-height: 100dvh; }
         .admin-sidebar {
-            width: 280px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-right: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            padding: 32px 20px;
-            position: fixed;
-            top: 0; bottom: 0; left: 0;
-            z-index: 1000;
+            width: 280px; background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--line);
+            display: flex; flex-direction: column; padding: 32px 20px;
+            position: fixed; top: 0; bottom: 0; left: 0; z-index: 1000;
             transition: var(--transition);
         }
-
         .admin-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--red);
-            text-decoration: none;
-            margin-bottom: 48px;
-            padding-left: 12px;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 22px; font-weight: 800; color: var(--red);
+            text-decoration: none; margin-bottom: 40px; padding-left: 12px;
         }
-
-        .admin-brand svg { width: 36px; height: 36px; filter: drop-shadow(0 4px 8px var(--primary-glow)); }
-
-        .admin-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            flex: 1;
+        .admin-brand svg { width: 34px; height: 34px; }
+        .admin-nav { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .admin-nav a, .logout-btn {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px; text-decoration: none; color: var(--muted);
+            font-weight: 700; font-size: 14px; border-radius: 16px;
+            transition: var(--transition); border: none; background: none;
+            width: 100%; text-align: left; cursor: pointer; font-family: inherit;
         }
+        .admin-nav a:hover, .logout-btn:hover { background: var(--blush); color: var(--red); transform: translateX(4px); }
+        .admin-nav a.active { background: var(--surface); box-shadow: var(--clay-shadow); color: var(--red); }
+        .nav-divider { height: 1px; background: var(--line); margin: 16px 0; }
+        .logout-btn { margin-top: auto; color: var(--red) !important; }
 
-        .admin-nav a {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            text-decoration: none;
-            color: var(--muted);
-            font-weight: 700;
-            font-size: 14px;
-            border-radius: 16px;
-            transition: var(--transition);
-        }
-
-        .admin-nav a svg { width: 20px; height: 20px; stroke-width: 2.5px; transition: var(--transition); }
-
-        .admin-nav a:hover {
-            background: var(--blush);
-            color: var(--red);
-            transform: translateX(5px);
-        }
-
-        .admin-nav a.active {
-            background: var(--surface);
-            box-shadow: var(--clay-shadow);
-            color: var(--red);
-        }
-
-        .nav-divider {
-            height: 1px;
-            background: var(--line);
-            margin: 20px 0;
-        }
-
-        .logout-btn {
-            margin-top: auto;
-            color: var(--red) !important;
-        }
-
-        /* Main Content */
-        .admin-main {
-            flex: 1;
-            margin-left: 280px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        /* Header */
+        .admin-main { flex: 1; margin-left: 280px; width: 100%; display: flex; flex-direction: column; min-width: 0; }
         .admin-header {
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: 900;
+            height: 80px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 900;
         }
-
-        .header-search {
-            flex: 0 1 400px;
-            position: relative;
-        }
-
+        .header-search { flex: 0 1 380px; }
         .header-search input {
-            width: 100%;
-            padding: 12px 20px;
-            padding-left: 45px;
-            border-radius: 999px;
-            border: none;
-            background: var(--field);
-            font-family: inherit;
-            font-size: 14px;
-            color: var(--ink);
+            width: 100%; padding: 12px 20px; border-radius: 999px; border: 1px solid var(--line);
+            background: var(--field); font: inherit; font-size: 14px; color: var(--ink);
             box-shadow: var(--clay-inset);
-            transition: var(--transition);
         }
-
-        .header-search input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px var(--red), var(--clay-inset);
-        }
-
-        .admin-header-right {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
+        .admin-header-right { display: flex; align-items: center; gap: 18px; }
         .theme-toggle {
-            background: var(--field);
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: grid;
-            place-items: center;
-            color: var(--ink);
-            box-shadow: var(--clay-shadow);
-            transition: var(--transition);
+            background: var(--field); border: none; width: 42px; height: 42px;
+            border-radius: 50%; cursor: pointer; display: grid; place-items: center;
+            color: var(--ink); box-shadow: var(--clay-shadow);
         }
+        .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 13px; }
+        .admin-badge { padding: 4px 10px; border-radius: 99px; background: var(--blush); color: var(--red); font-size: 11px; font-weight: 800; }
 
-        .theme-toggle:active { transform: scale(0.9); }
-
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .admin-profile img {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 2px solid var(--red);
-            padding: 2px;
-            background: var(--surface);
-            object-fit: cover;
-        }
-
-        /* Content Grid */
-        .admin-content {
-            padding: 40px;
-            max-width: 1400px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .page-title {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .page-title h1 {
-            font-size: clamp(24px, 5vw, 32px);
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -1px;
-        }
+        .admin-content { padding: 40px; max-width: 1400px; width: 100%; margin: 0 auto; }
+        .page-title { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 34px; }
+        .page-title h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; margin: 0; }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-            min-height: 44px;
-            text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 22px; border-radius: 14px; font-weight: 700; font-size: 13px;
+            cursor: pointer; border: none; transition: var(--transition); font-family: inherit; text-decoration: none;
         }
+        .btn-primary { background: var(--red); color: white; box-shadow: 0 8px 20px var(--primary-glow); }
+        .btn-primary:hover { background: var(--red-dark); transform: translateY(-2px); }
+        .btn-ghost { background: var(--field); color: var(--ink); }
+        .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 10px; }
+        .btn-approve { background: #e6fcf5; color: #087f5b; }
+        .btn-approve:hover { background: #087f5b; color: white; }
+        .btn-reject { background: #ffe3e3; color: #c92a2a; }
+        .btn-reject:hover { background: #c92a2a; color: white; }
 
-        .btn-primary {
-            background: var(--red);
-            color: white;
-            box-shadow: 0 8px 20px var(--primary-glow);
-        }
-
-        .btn-primary:hover {
-            background: var(--red-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px var(--primary-glow);
-        }
-
-        /* Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 36px; }
         .stat-card {
-            padding: 30px;
-            background: var(--surface);
-            border-radius: 28px;
-            box-shadow: var(--clay-shadow);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            transition: var(--transition);
+            padding: 26px; background: var(--surface); border-radius: 26px;
+            box-shadow: var(--clay-shadow); border: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 20px;
         }
-
-        .stat-card:hover { transform: translateY(-5px); }
-
         .stat-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            display: grid;
-            place-items: center;
-            font-size: 28px;
-            background: var(--field);
-            box-shadow: var(--clay-inset);
+            width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center;
+            font-size: 26px; background: var(--field); box-shadow: var(--clay-inset);
         }
+        .stat-info span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+        .stat-info strong { font-size: 28px; font-weight: 800; }
 
-        .stat-info span {
-            display: block;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: var(--muted);
-            margin-bottom: 4px;
-        }
-
-        .stat-info strong {
-            font-size: 32px;
-            font-weight: 800;
-        }
-
-        /* Table */
         .card-container {
-            background: var(--surface);
-            border-radius: 28px;
-            box-shadow: var(--clay-shadow);
-            border: 1px solid var(--glass-border);
-            padding: 32px;
-            margin-bottom: 40px;
+            background: var(--surface); border-radius: 28px; box-shadow: var(--clay-shadow);
+            border: 1px solid var(--glass-border); padding: 30px; margin-bottom: 36px;
         }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .card-header h2 {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            width: 100%;
-            border-radius: 16px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            min-width: 600px;
-        }
-
-        th {
-            padding: 16px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--line);
-        }
-
-        td {
-            padding: 20px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            border-bottom: 1px solid var(--line);
-        }
-
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .card-header h2 { font-size: 19px; font-weight: 800; margin: 0; }
+        .table-wrapper { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 640px; }
+        th { padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--line); }
+        td { padding: 16px; font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--line); vertical-align: middle; }
         tr:hover td { background: var(--blush); }
 
-        .status-pill {
-            padding: 6px 12px;
-            border-radius: 99px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
+        .status-pill { padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block; }
         .status-pending { background: #fff8e6; color: #b45d00; }
         .status-approved { background: #e6fcf5; color: #087f5b; }
+        .status-rejected { background: #ffe3e3; color: #c92a2a; }
 
-        /* Modal */
         .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(45, 36, 36, 0.4);
-            backdrop-filter: blur(8px);
-            display: none;
-            place-items: center;
-            z-index: 2000;
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(25, 18, 18, 0.55);
+            backdrop-filter: blur(8px); display: none; place-items: center; z-index: 2000; padding: 20px;
         }
-
         .modal-overlay.active { display: grid; }
-
         .modal-card {
-            background: var(--surface);
-            padding: 40px;
-            border-radius: 32px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            border: 1px solid var(--glass-border);
-            animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: var(--surface); padding: 36px; border-radius: 28px;
+            width: 100%; max-width: 520px; box-shadow: 0 24px 60px rgba(0,0,0,0.3);
         }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.9) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+        .modal-card h2 { margin: 0 0 24px; font-weight: 800; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line);
+            background: var(--field); font: inherit; color: var(--ink); box-shadow: var(--clay-inset); font-size: 14px;
         }
-
-        .modal-card h2 { margin: 0 0 30px; font-weight: 800; }
-
-        .form-group { margin-bottom: 24px; }
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 14px 18px;
-            border-radius: 14px;
-            border: none;
-            background: var(--field);
-            font-family: inherit;
-            color: var(--ink);
-            box-shadow: var(--clay-inset);
-            font-size: 15px;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 32px;
-        }
-
-        .btn-ghost { background: transparent; color: var(--muted); }
-        .btn-ghost:hover { color: var(--ink); background: var(--field); }
-
-        /* Mobile Adjustments */
-        .mobile-header-actions { display: none; }
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--ink);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+        .menu-toggle { display: none; background: none; border: none; color: var(--ink); font-size: 24px; cursor: pointer; }
 
         @media (max-width: 992px) {
             .admin-sidebar { transform: translateX(-100%); }
-            .admin-sidebar.open { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.1); }
+            .admin-sidebar.open { transform: translateX(0); }
             .admin-main { margin-left: 0; }
             .menu-toggle { display: block; }
             .header-search { display: none; }
             .admin-header { padding: 0 20px; }
             .admin-content { padding: 24px; }
         }
-
-        @media (max-width: 600px) {
-            .page-title { flex-direction: column; align-items: flex-start; }
-            .btn { width: 100%; }
-        }
     </style>
 </head>
 <body>
 
+<!-- Security Verification Overlay -->
+<div id="securityShield">
+    <div class="spinner" id="shieldSpinner"></div>
+    <h2 id="shieldTitle" style="margin:0;">Verifying Creator & Admin Credentials...</h2>
+    <p id="shieldSub" style="color:var(--muted);max-width:440px;margin:0;">Checking Firebase Authentication & Creator Whitelist permissions.</p>
+</div>
+
 <div class="admin-layout">
-    <!-- Sidebar -->
     <aside class="admin-sidebar" id="adminSidebar">
         <a href="index.html" class="admin-brand">
             <svg viewBox="0 0 64 64" fill="currentColor">
-                <ellipse cx="32" cy="42" rx="13" ry="11"/>
-                <circle cx="15" cy="28" r="6"/>
-                <circle cx="27" cy="17" r="6"/>
-                <circle cx="41" cy="17" r="6"/>
-                <circle cx="53" cy="28" r="6"/>
+                <ellipse cx="32" cy="42" rx="13" ry="11"/><circle cx="15" cy="28" r="6"/><circle cx="27" cy="17" r="6"/><circle cx="41" cy="17" r="6"/><circle cx="53" cy="28" r="6"/>
             </svg>
             <span>PawForward</span>
         </a>
         
         <nav class="admin-nav">
-            <a href="#" class="active">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                Dashboard
-            </a>
-            <a href="adopt.html">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                Animals
-            </a>
+            <a href="#overview" class="active">📊 Dashboard Overview</a>
+            <a href="#applicationsSection">📝 Adoption Pipeline</a>
+            <a href="#registrySection">🐾 Cloud Pet Registry</a>
+            <a href="#mailLogsSection">✉️ Email Notification Log</a>
             <div class="nav-divider"></div>
-            <a href="index.html">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Main Website
-            </a>
-            <a href="index.html" class="logout-btn">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                Sign Out
-            </a>
+            <a href="adopt.html">🌐 View Live Adopt Page</a>
+            <a href="index.html">🏠 Return to Main Site</a>
+            <button type="button" class="logout-btn" onclick="executeSignOut()">🚪 Sign Out Safely</button>
         </nav>
     </aside>
 
     <main class="admin-main">
-        <!-- Header -->
         <header class="admin-header">
-            <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">☰</button>
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
             <div class="header-search">
-                <input type="text" placeholder="Search applications, pets, logs...">
+                <input type="text" id="adminSearchInput" placeholder="Filter applications, pets, or email logs...">
             </div>
             <div class="admin-header-right">
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                </button>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">🌓</button>
                 <div class="admin-profile">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=b63737&color=fff" alt="Admin Profile">
-                    <span>Admin User</span>
+                    <span class="admin-badge">CREATOR / ADMIN</span>
+                    <span id="adminEmailLabel">admin@pawforward.org</span>
                 </div>
             </div>
         </header>
 
-        <!-- Main Dashboard Content -->
-        <div class="admin-content">
+        <div class="admin-content" id="overview">
             <div class="page-title">
-                <h1>Dashboard Overview</h1>
-                <button class="btn btn-primary" id="openModalBtn">
-                    <span>+ Add New Pet</span>
-                </button>
+                <div>
+                    <h1>Shelter Command Center</h1>
+                    <p style="color:var(--muted);margin:4px 0 0;font-size:14px;">Real-time Firestore sync for rescues, adoption inquiries, and automated emails.</p>
+                </div>
+                <button class="btn btn-primary" id="openModalBtn">+ Register New Rescue Pet</button>
             </div>
 
-            <!-- Stats -->
+            <!-- Live Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">🐾</div>
                     <div class="stat-info">
-                        <span>Total Rescues</span>
-                        <strong>143</strong>
+                        <span>Total Listed Pets</span>
+                        <strong id="statTotalPets">9</strong>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">🏠</div>
+                    <div class="stat-icon">📩</div>
                     <div class="stat-info">
-                        <span>Monthly Adoptions</span>
-                        <strong>38</strong>
+                        <span>Adoption Applications</span>
+                        <strong id="statTotalApps">0</strong>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">💝</div>
                     <div class="stat-info">
-                        <span>Recent Donations</span>
-                        <strong>₱45,200</strong>
+                        <span>Community Fund Raised</span>
+                        <strong id="statDonations">&#8369;34,000</strong>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Applications -->
-            <div class="card-container">
+            <!-- Live Adoption Applications Pipeline -->
+            <div class="card-container" id="applicationsSection">
                 <div class="card-header">
-                    <h2>Pending Applications</h2>
+                    <h2>Adoption & Shelter Inquiries Pipeline</h2>
+                    <span style="font-size:12px;color:var(--muted);">Approve or Decline to update Firestore & trigger applicant email notification</span>
                 </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
                                 <th>Applicant</th>
-                                <th>Pet Requested</th>
+                                <th>Pet / Topic</th>
+                                <th>Message</th>
                                 <th>Date</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="inquiriesTableBody">
+                            <tr><td colspan="6" style="text-align:center;color:var(--muted);">Loading live inquiries from Firestore...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Live Cloud Animals Registry -->
+            <div class="card-container" id="registrySection">
+                <div class="card-header">
+                    <h2>Cloud Animal Registry (Firestore `animals`)</h2>
+                    <span style="font-size:12px;color:var(--muted);">Synced live with adopt.html</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>Maria Santos</td>
-                                <td>Bantay (Dog)</td>
-                                <td>Oct 24, 2026</td>
-                                <td><span class="status-pill status-pending">Pending Review</span></td>
+                                <th>Pet Name</th>
+                                <th>Species & Sex</th>
+                                <th>Age (Months)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
+                        </thead>
+                        <tbody id="animalsTableBody">
+                            <tr><td colspan="5" style="text-align:center;color:var(--muted);">Loading cloud animals...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Automated Email Dispatch Audit Log -->
+            <div class="card-container" id="mailLogsSection">
+                <div class="card-header">
+                    <h2>Automated Email Notification Logs (Firestore `mail_logs`)</h2>
+                    <span style="font-size:12px;color:var(--muted);">Every signup, inquiry, and status update is logged here</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>John Cruz</td>
-                                <td>Mingming (Cat)</td>
-                                <td>Oct 22, 2026</td>
-                                <td><span class="status-pill status-approved">Approved</span></td>
+                                <th>Recipient</th>
+                                <th>Subject</th>
+                                <th>Message Preview</th>
+                                <th>Timestamp</th>
                             </tr>
+                        </thead>
+                        <tbody id="mailLogsTableBody">
+                            <tr><td colspan="4" style="text-align:center;color:var(--muted);">Loading email notification logs...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -617,113 +352,308 @@
 <!-- Add Pet Modal -->
 <div class="modal-overlay" id="animalModal">
     <div class="modal-card">
-        <h2>Register Rescue Pet</h2>
+        <h2>Register Rescue Pet to Cloud</h2>
         <form id="addAnimalForm">
-            <div class="form-group">
-                <label for="petName">Pet Name</label>
-                <input type="text" id="petName" required placeholder="e.g. Luna">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="petName">Pet Name *</label>
+                    <input type="text" id="petName" required placeholder="e.g. Bantay Jr.">
+                </div>
+                <div class="form-group">
+                    <label for="petType">Species *</label>
+                    <select id="petType">
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="petSex">Gender</label>
+                    <select id="petSex">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="petAge">Age in Months</label>
+                    <input type="number" id="petAge" value="18" min="1" max="240" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="petStatus">Availability Status</label>
+                    <select id="petStatus">
+                        <option value="Available">Available</option>
+                        <option value="Pending">Pending Adoption</option>
+                        <option value="Medical">Under Medical Care</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="petImg">Photo URL (Optional)</label>
+                    <input type="url" id="petImg" placeholder="https://... or leave blank for fallback">
+                </div>
             </div>
             <div class="form-group">
-                <label for="petType">Species</label>
-                <select id="petType">
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="petStatus">Availability</label>
-                <select id="petStatus">
-                    <option value="Available">Available for Adoption</option>
-                    <option value="Pending">Pending Review</option>
-                    <option value="Medical">Under Medical Care</option>
-                </select>
+                <label for="petDesc">Rescue Story & Temperament</label>
+                <textarea id="petDesc" rows="3" placeholder="Friendly, vaccinated, loves walks..."></textarea>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-ghost" id="closeModalBtn">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="savePetBtn">Add to Registry</button>
+                <button type="submit" class="btn btn-primary" id="savePetBtn">Save to Cloud Registry</button>
             </div>
         </form>
     </div>
 </div>
 
 <script type="module">
-    // --- Dashboard UI Logic ---
-    const html = document.documentElement;
-    const themeBtn = document.getElementById('themeToggle');
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('adminSidebar');
-    const modal = document.getElementById('animalModal');
-    const openBtn = document.getElementById('openModalBtn');
-    const closeBtn = document.getElementById('closeModalBtn');
-    const form = document.getElementById('addAnimalForm');
+    import { supabase, verifyAdminAccess, sendAutomatedEmail } from "./firebase-config.js";
 
-    // Theme Toggle
-    themeBtn.addEventListener('click', () => {
-        const current = html.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('pawforward-theme', next);
-    });
+    const shield = document.getElementById("securityShield");
+    const shieldTitle = document.getElementById("shieldTitle");
+    const shieldSub = document.getElementById("shieldSub");
+    const shieldSpinner = document.getElementById("shieldSpinner");
 
-    // Check Local Storage for Theme
-    if (localStorage.getItem('pawforward-theme') === 'dark') {
-        html.setAttribute('data-theme', 'dark');
+    // 1. Creator/Admin Route Guard (Supabase Session Check)
+    async function checkAdminAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user ? { ...session.user, uid: session.user.id } : null;
+
+        if (!user) {
+            shieldSpinner.style.display = "none";
+            shieldTitle.textContent = "Admin Authentication Required";
+            shieldSub.innerHTML = "Please sign in with an authorized Creator / Staff email on the main website.<br><br><a href='index.html' class='btn btn-primary'>Return to Home</a>";
+            return;
+        }
+
+        const isAllowed = await verifyAdminAccess(user);
+        if (!isAllowed) {
+            shieldSpinner.style.display = "none";
+            shieldTitle.textContent = "Access Restricted";
+            shieldSub.innerHTML = `Signed in as <strong>${user.email}</strong>, which is not on the Creator/Admin Whitelist.<br><br><a href='index.html' class='btn btn-primary'>Return to Home</a>`;
+            return;
+        }
+
+        // Authorized! Reveal Dashboard
+        document.getElementById("adminEmailLabel").textContent = user.email;
+        shield.style.opacity = "0";
+        setTimeout(() => shield.remove(), 350);
+        loadDashboardData();
     }
 
-    // Mobile Sidebar Toggle
-    menuToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sidebar.classList.toggle('open');
-    });
+    checkAdminAuth();
 
-    document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && sidebar.classList.contains('open')) {
-            sidebar.classList.remove('open');
+    // 2. Global Sign Out Function
+    window.executeSignOut = async function() {
+        try {
+            await supabase.auth.signOut();
+            localStorage.removeItem("paw_user_role");
+            localStorage.removeItem("pawforwardSession");
+            window.location.href = "index.html";
+        } catch (error) {
+            alert("Sign out error: " + error.message);
+        }
+    };
+
+    // 3. Load Live Inquiries, Cloud Pets & Email Logs from Supabase
+    async function loadDashboardData() {
+        const raised = Number(localStorage.getItem("pawforwardRaised")) || 34000;
+        document.getElementById("statDonations").textContent = "₱" + raised.toLocaleString();
+
+        // Load Cloud Animals
+        const animalsBody = document.getElementById("animalsTableBody");
+        try {
+            const { data: animals, error } = await supabase.from("animals").select("*");
+            if (error) throw error;
+            
+            document.getElementById("statTotalPets").textContent = (animals?.length || 0) + 9; // Cloud + 9 Base pets
+            animalsBody.innerHTML = "";
+            
+            if (!animals || animals.length === 0) {
+                animalsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No custom cloud pets added yet. Click "+ Register New Rescue Pet" above!</td></tr>';
+            } else {
+                animals.forEach((pet) => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><strong>${pet.name || "Unnamed"}</strong></td>
+                        <td>${pet.type || "Dog"} · ${pet.sex || "Male"}</td>
+                        <td>${pet.ageMonths || 12} mos</td>
+                        <td><span class="status-pill ${pet.status === 'Available' ? 'status-approved' : 'status-pending'}">${pet.status || "Available"}</span></td>
+                        <td><button class="btn btn-sm btn-reject" data-del-pet="${pet.id}">Remove</button></td>
+                    `;
+                    animalsBody.appendChild(tr);
+                });
+            }
+        } catch (e) {
+            console.warn(e);
+        }
+
+        // Load Live Adoption Inquiries
+        const inqBody = document.getElementById("inquiriesTableBody");
+        try {
+            const { data: inquiries, error } = await supabase.from("inquiries").select("*").order("createdAt", { ascending: false });
+            if (error) throw error;
+
+            document.getElementById("statTotalApps").textContent = inquiries?.length || 2;
+            inqBody.innerHTML = "";
+
+            if (!inquiries || inquiries.length === 0) {
+                inqBody.innerHTML = `
+                    <tr>
+                        <td><strong>Maria Santos</strong><br><small style="color:var(--muted)">maria.santos@email.ph</small></td>
+                        <td>Bantay (Dog)</td>
+                        <td>Hi! We have a fenced yard and would love to meet Bantay.</td>
+                        <td>Oct 24, 2026</td>
+                        <td><span class="status-pill status-pending">Pending Review</span></td>
+                        <td><span style="font-size:12px;color:var(--muted);">Sample Record (Submit form on Contact page to test live)</span></td>
+                    </tr>
+                `;
+            } else {
+                inquiries.forEach((q) => {
+                    const st = q.status || "Pending Review";
+                    const pillClass = st === "Approved" ? "status-approved" : st === "Rejected" ? "status-rejected" : "status-pending";
+                    const dateStr = q.createdAt ? new Date(q.createdAt).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : "Recent";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><strong>${q.name || "Applicant"}</strong><br><small style="color:var(--muted)">${q.email || ""}</small></td>
+                        <td>${q.pet || q.topic || "General"}</td>
+                        <td style="max-width:260px;font-weight:500;">${q.message || ""}</td>
+                        <td>${dateStr}</td>
+                        <td><span class="status-pill ${pillClass}">${st}</span></td>
+                        <td style="display:flex;gap:6px;">
+                            <button class="btn btn-sm btn-approve" data-id="${q.id}" data-email="${q.email || ''}" data-name="${q.name || ''}" data-pet="${q.pet || ''}" data-act="Approved">Approve</button>
+                            <button class="btn btn-sm btn-reject" data-id="${q.id}" data-email="${q.email || ''}" data-name="${q.name || ''}" data-pet="${q.pet || ''}" data-act="Rejected">Decline</button>
+                        </td>
+                    `;
+                    inqBody.appendChild(tr);
+                });
+            }
+        } catch (e) {
+            console.warn(e);
+        }
+
+        // Load Email Notification Logs
+        const mailBody = document.getElementById("mailLogsTableBody");
+        try {
+            const { data: logs, error } = await supabase.from("mail_logs").select("*").order("createdAt", { ascending: false });
+            if (error) throw error;
+
+            mailBody.innerHTML = "";
+            if (!logs || logs.length === 0) {
+                mailBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);">No automated emails triggered yet.</td></tr>';
+            } else {
+                logs.slice(0, 12).forEach((m) => {
+                    const tr = document.createElement("tr");
+                    const dt = m.createdAt ? new Date(m.createdAt).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+                    tr.innerHTML = `
+                        <td><strong>${m.to_name || "User"}</strong><br><small style="color:var(--muted)">${m.to_email || ""}</small></td>
+                        <td>${m.subject || ""}</td>
+                        <td style="max-width:300px;font-weight:500;color:var(--muted);">${m.message || ""}</td>
+                        <td>${dt}</td>
+                    `;
+                    mailBody.appendChild(tr);
+                });
+            }
+        } catch (e) {
+            console.warn(e);
+        }
+    }
+
+    // Handle Approve / Reject Application + Send Email Alert
+    document.getElementById("inquiriesTableBody").addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        const { id, act, email, name, pet } = btn.dataset;
+        btn.disabled = true;
+        btn.textContent = "Updating...";
+
+        try {
+            const { error } = await supabase.from("inquiries").update({ status: act }).eq("id", id);
+            if (error) throw error;
+
+            await sendAutomatedEmail({
+                to_email: email,
+                to_name: name,
+                subject: `PawForward Application Update: ${pet} (${act})`,
+                message: `Hi ${name}, your adoption application for ${pet} has been reviewed and marked as ${act} by our shelter team! Log in to your PawForward account portal to view details.`
+            });
+            await loadDashboardData();
+        } catch (err) {
+            alert("Could not update application: " + err.message);
         }
     });
 
-    // Modal Controls
-    openBtn.addEventListener('click', () => modal.classList.add('active'));
-    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-
-    // --- Firebase Integration ---
-    // Note: requires firebase-config.js in same directory
-    import { db } from "./firebase-config.js";
-    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const name = document.getElementById("petName").value;
-        const type = document.getElementById("petType").value;
-        const status = document.getElementById("petStatus").value;
-        const saveBtn = document.getElementById("savePetBtn");
-
+    // Handle Delete Pet
+    document.getElementById("animalsTableBody").addEventListener("click", async (e) => {
+        const delBtn = e.target.closest("button[data-del-pet]");
+        if (!delBtn) return;
+        if (!confirm("Remove this pet from the cloud registry?")) return;
         try {
-            saveBtn.textContent = "Processing...";
+            const { error } = await supabase.from("animals").delete().eq("id", delBtn.dataset.delPet);
+            if (error) throw error;
+            await loadDashboardData();
+        } catch (err) {
+            alert("Error removing pet: " + err.message);
+        }
+    });
+
+    // Theme & Sidebar Controls
+    const html = document.documentElement;
+    if (localStorage.getItem("pawforwardTheme") === "dark") html.setAttribute("data-theme", "dark");
+    document.getElementById("themeToggle").addEventListener("click", () => {
+        const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", next);
+        localStorage.setItem("pawforwardTheme", next);
+    });
+
+    const sidebar = document.getElementById("adminSidebar");
+    document.getElementById("menuToggle").addEventListener("click", (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle("open");
+    });
+
+    // Modal & Add Pet Form
+    const modal = document.getElementById("animalModal");
+    document.getElementById("openModalBtn").addEventListener("click", () => modal.classList.add("active"));
+    document.getElementById("closeModalBtn").addEventListener("click", () => modal.classList.remove("active"));
+
+    document.getElementById("addAnimalForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const saveBtn = document.getElementById("savePetBtn");
+        try {
+            saveBtn.textContent = "Saving to Cloud...";
             saveBtn.disabled = true;
 
-            await addDoc(collection(db, "animals"), {
-                name: name,
-                type: type,
-                status: status,
-                createdAt: new Date()
-            });
+            const { error } = await supabase.from("animals").insert([{
+                name: document.getElementById("petName").value.trim(),
+                type: document.getElementById("petType").value,
+                sex: document.getElementById("petSex").value,
+                ageMonths: Number(document.getElementById("petAge").value) || 12,
+                status: document.getElementById("petStatus").value,
+                img: document.getElementById("petImg").value.trim(),
+                desc: document.getElementById("petDesc").value.trim() || "Rescued and ready for a loving home.",
+                arrivalDate: new Date().toISOString().slice(0, 10),
+                createdAt: new Date().toISOString()
+            }]);
 
-            form.reset();
+            if (error) throw error;
+
+            document.getElementById("addAnimalForm").reset();
             modal.classList.remove("active");
-            // Soft refresh or redirect
-            window.location.reload(); 
+            await loadDashboardData();
         } catch (error) {
-            console.error("Firebase Error:", error);
-            alert("Database connection failed. Please check your Firebase configuration.");
+            alert("Database error: " + error.message);
         } finally {
-            saveBtn.textContent = "Add to Registry";
+            saveBtn.textContent = "Save to Cloud Registry";
             saveBtn.disabled = false;
         }
     });
-</script>
 
-</body>
-</html>
+    // Live Search Filter
+    document.getElementById("adminSearchInput").addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase();
+        document.querySelectorAll("tbody tr").forEach((row) => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+        });
+    });
+</script>

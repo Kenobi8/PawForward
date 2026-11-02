@@ -1,4 +1,4 @@
-/* My account page. Needs core.js and script.js first. */
+/* account.js - My account page. Needs Core.js and script.js first. */
 (function () {
     const money = (n) => "\u20B1" + Number(n).toLocaleString("en-US");
     const date = (iso) => new Date(iso).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
@@ -23,17 +23,17 @@
     });
 
     function empty(text, href, label) {
-        return '<div class="panel-empty"><p>' + text + '</p><a href="' + href + '" class="btn">' + label + "</a></div>";
+        return '<div class="panel-empty clay-card"><p>' + text + '</p><a href="' + href + '" class="btn">' + label + "</a></div>";
     }
 
     function renderDonations() {
         const list = UserData.donations(), box = byId("panel-donations");
-        if (!list.length) { box.innerHTML = empty("No donations yet. Your first gift and its receipt will show up here.", "donate.html", "Make a donation"); return; }
+        if (!list.length) { box.innerHTML = empty("No donations yet. Your first gift and its official tax receipt will show up here.", "donate.html", "Make a donation"); return; }
         box.innerHTML = '<ul class="rec-list"></ul>';
         const ul = qs("ul", box);
         list.forEach((d) => {
             const li = document.createElement("li");
-            li.className = "rec";
+            li.className = "rec clay-card";
             li.innerHTML = "<div><strong></strong><small></small></div><button type=\"button\" class=\"link-btn\">View receipt</button>";
             qs("strong", li).textContent = money(d.amount);
             qs("small", li).textContent = date(d.date) + " \u00B7 " + cap(d.method) + " \u00B7 " + d.id;
@@ -50,18 +50,45 @@
         list.forEach((a, i) => qs(".animal-grid", box).appendChild(animalCard(a, i)));
     }
 
-    function renderInquiries() {
-        const list = UserData.inquiries(), box = byId("panel-inquiries");
-        if (!list.length) { box.innerHTML = empty("No inquiries yet. Message us about an animal and you can follow it here.", "contact.html", "Contact us"); return; }
+    async function renderInquiries() {
+        const box = byId("panel-inquiries");
+        const user = Auth.current();
+        let list = UserData.inquiries();
+
+        // Sync live application statuses from Firestore if available
+        if (user && window.PawFirebase) {
+            const cloudList = await window.PawFirebase.fetchUserInquiriesFromCloud(user.email);
+            if (cloudList && cloudList.length) {
+                list = cloudList;
+            }
+        }
+
+        byId("statInquiries").textContent = list.length;
+
+        if (!list.length) {
+            box.innerHTML = empty("No adoption inquiries yet. Message us about an animal and track your live approval status here.", "adopt.html", "Browse adoptable pets");
+            return;
+        }
         box.innerHTML = '<ul class="rec-list"></ul>';
+        const ul = qs("ul", box);
         list.forEach((q) => {
             const li = document.createElement("li");
-            li.className = "rec";
+            li.className = "rec clay-card";
             li.innerHTML = '<div><strong></strong><small></small></div><span class="status"></span>';
-            qs("strong", li).textContent = q.pet ? "About " + q.pet : q.topic;
-            qs("small", li).textContent = date(q.date) + " \u00B7 " + (q.message.length > 70 ? q.message.slice(0, 70) + "\u2026" : q.message);
-            qs(".status", li).textContent = q.status;
-            byId("panel-inquiries").querySelector("ul").appendChild(li);
+            qs("strong", li).textContent = q.pet ? "Adoption Inquiry: " + q.pet : q.topic;
+            qs("small", li).textContent = date(q.date) + " \u00B7 " + (q.message.length > 75 ? q.message.slice(0, 75) + "\u2026" : q.message);
+            const st = qs(".status", li);
+            st.textContent = q.status || "Pending Review";
+            if (q.status === "Approved") {
+                st.style.background = "#e6fcf5";
+                st.style.color = "#087f5b";
+                st.style.borderColor = "#087f5b";
+            } else if (q.status === "Rejected") {
+                st.style.background = "#ffe3e3";
+                st.style.color = "#c92a2a";
+                st.style.borderColor = "#c92a2a";
+            }
+            ul.appendChild(li);
         });
     }
 
@@ -80,13 +107,15 @@
         const user = Auth.current();
         byId("accountGate").hidden = !!user;
         byId("accountApp").hidden = !user;
-        byId("acctWelcome").textContent = user ? "Hi, " + user.firstName + ". Everything you've done with PawForward is here." : "Sign in to see your donations, saved animals and inquiries.";
+        byId("acctWelcome").textContent = user ? "Hi, " + user.firstName + ". Track your live adoption applications, saved animals, and official receipts here." : "Sign in to see your donations, saved animals and inquiries.";
         if (!user) return;
         const donations = UserData.donations();
         byId("statDonated").textContent = money(donations.reduce((s, d) => s + Number(d.amount), 0));
         byId("statSaved").textContent = UserData.saved().length;
         byId("statInquiries").textContent = UserData.inquiries().length;
-        renderDonations(); renderSaved(); renderInquiries();
+        renderDonations();
+        renderSaved();
+        renderInquiries();
     }
 
     addPasswordToggles(byId("accountApp"));
@@ -99,6 +128,7 @@
     }, () => {
         Auth.updateProfile({ firstName: byId("pfFirst").value, lastName: byId("pfLast").value, city: byId("pfCity").value, phone: byId("pfPhone").value });
         refreshAuth();
+        render();
         toast("Profile saved");
     });
 
@@ -116,9 +146,10 @@
     });
 
     byId("gateSignIn").addEventListener("click", () => openAuth("Sign in to see your account."));
-    byId("acctSignOut").addEventListener("click", () => { Auth.signOut(); refreshAuth(); toast("You've been signed out."); });
+    byId("acctSignOut").addEventListener("click", () => { Auth.signOut(); refreshAuth(); render(); toast("You've been signed out."); });
     window.addEventListener("authchange", () => { render(); fillProfile(); });
     window.addEventListener("savedchange", render);
+    window.addEventListener("cloudanimalssynced", renderSaved);
 
     const TAB_NAMES = ["donations", "saved", "inquiries", "profile"];
     window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (TAB_NAMES.includes(h)) selectTab(h); });

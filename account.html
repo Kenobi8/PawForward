@@ -3,33 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PawForward | My account</title>
+    <title>PawForward | My Account</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="header-mount"></div>
-<script src="layout.js"></script>
+<script src="Layout.js"></script>
 
 <section class="page-banner">
     <h1><span>My account</span></h1>
-    <p id="acctWelcome">Sign in to see your donations, saved animals and inquiries.</p>
+    <p id="acctWelcome">Sign in to see your donations, saved animals and live adoption applications.</p>
 </section>
 
 <section class="container">
-    <div class="gate-card" id="accountGate" hidden>
+    <div class="gate-card clay-panel" id="accountGate" hidden>
         <h2>Sign in to see your account</h2>
-        <p>Your donations and receipts, the animals you saved, and your adoption inquiries all live here.</p>
-        <button type="button" class="btn" id="gateSignIn">Sign in or sign up</button>
+        <p>Your donations and official receipts, the animals you saved, and your live adoption inquiries all live here.</p>
+        <button type="button" class="btn" id="gateSignIn">Sign in or create account</button>
     </div>
 
     <div id="accountApp" hidden>
         <div class="stats">
-            <div class="stat"><span>Total donated</span><strong id="statDonated">0</strong></div>
-            <div class="stat"><span>Animals saved</span><strong id="statSaved">0</strong></div>
-            <div class="stat"><span>Inquiries sent</span><strong id="statInquiries">0</strong></div>
+            <div class="stat clay-card"><span>Total donated</span><strong id="statDonated">&#8369;0</strong></div>
+            <div class="stat clay-card"><span>Animals saved</span><strong id="statSaved">0</strong></div>
+            <div class="stat clay-card"><span>Inquiries sent</span><strong id="statInquiries">0</strong></div>
         </div>
 
         <div class="tabs" id="tabs" role="tablist" aria-label="Account sections">
@@ -45,18 +45,18 @@
 
         <div class="panel" id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
             <div class="profile-grid">
-                <form class="profile-card" id="profileForm" novalidate>
+                <form class="profile-card clay-card" id="profileForm" novalidate>
                     <h3>Your details</h3>
                     <p class="req-note"><span class="req">*</span> Required</p>
                     <div class="field"><label for="pfFirst">First name<span class="req" aria-hidden="true">*</span></label><input type="text" id="pfFirst" autocomplete="given-name" aria-describedby="pfFirst-msg"><small class="field-msg" id="pfFirst-msg"></small></div>
                     <div class="field"><label for="pfLast">Last name</label><input type="text" id="pfLast" autocomplete="family-name" aria-describedby="pfLast-msg"><small class="field-msg" id="pfLast-msg"></small></div>
                     <div class="field"><label for="pfCity">City</label><input type="text" id="pfCity" autocomplete="address-level2" aria-describedby="pfCity-msg"><small class="field-msg" id="pfCity-msg"></small></div>
                     <div class="field"><label for="pfPhone">Mobile number</label><input type="tel" id="pfPhone" autocomplete="tel" placeholder="Optional" aria-describedby="pfPhone-msg"><small class="field-msg" id="pfPhone-msg"></small></div>
-                    <p class="field-msg" id="pfEmail"></p>
+                    <p class="field-msg" id="pfEmail" style="margin:10px 0;font-weight:700;color:var(--red-text);"></p>
                     <button type="submit" class="donate-now">Save changes</button>
                 </form>
 
-                <form class="profile-card" id="passwordForm" novalidate>
+                <form class="profile-card clay-card" id="passwordForm" novalidate>
                     <h3>Change password</h3>
                     <div class="field"><label for="pwCurrent">Current password<span class="req" aria-hidden="true">*</span></label><input type="password" id="pwCurrent" autocomplete="current-password" aria-describedby="pwCurrent-msg"><small class="field-msg" id="pwCurrent-msg"></small></div>
                     <div class="field"><label for="pwNew">New password<span class="req" aria-hidden="true">*</span></label><input type="password" id="pwNew" autocomplete="new-password" aria-describedby="pwNew-msg"><small class="field-msg" id="pwNew-msg"></small><small class="hint">At least 8 characters</small></div>
@@ -70,9 +70,9 @@
 </section>
 
 <div id="footer-placeholder"></div>
-<script src="core.js"></script>
+<script src="Core.js"></script>
 <script src="script.js"></script>
-<script src="cart.js"></script>
+<script src="Cart.js"></script>
 <script src="account.js"></script>
 </body>
 </html>

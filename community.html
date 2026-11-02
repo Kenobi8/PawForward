@@ -6,20 +6,19 @@
     <title>PawForward | Community & Get Involved</title>
     <meta name="description" content="Join the PawForward community. Take our pet matching quiz, fund urgent care, sponsor an animal, or volunteer for a shift.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Navigation Header loads here -->
 <div id="header-mount"></div>
+<script src="Layout.js"></script>
 
 <main>
-    <!-- Page Banner -->
     <section class="page-banner">
         <div class="container">
-            <h1><span style="animation-delay: 0s;">Get</span></h1>
-            <h1><span style="animation-delay: 0.1s;">Involved</span></h1>
+            <h1><span>Get</span></h1>
+            <h1><span>Involved</span></h1>
             <p>Take our match quiz, fund urgent care, or volunteer today. Every little bit helps.</p>
         </div>
     </section>
@@ -33,17 +32,17 @@
             <div id="quizStep1" class="quiz-step active">
                 <h3>What best describes your living space?</h3>
                 <div class="quiz-options">
-                    <button class="quiz-btn" onclick="nextQuizStep(2)">Apartment (No Yard)</button>
-                    <button class="quiz-btn" onclick="nextQuizStep(2)">House with a Fenced Yard</button>
-                    <button class="quiz-btn" onclick="nextQuizStep(2)">Farm / Acreage</button>
+                    <button type="button" class="quiz-btn" onclick="nextQuizStep(2)">Apartment (No Yard)</button>
+                    <button type="button" class="quiz-btn" onclick="nextQuizStep(2)">House with a Fenced Yard</button>
+                    <button type="button" class="quiz-btn" onclick="nextQuizStep(2)">Farm / Acreage</button>
                 </div>
             </div>
             <div id="quizStep2" class="quiz-step" hidden>
                 <h3>How active is your daily lifestyle?</h3>
                 <div class="quiz-options">
-                    <button class="quiz-btn" onclick="nextQuizStep(3)">Couch Potato (Relaxed)</button>
-                    <button class="quiz-btn" onclick="nextQuizStep(3)">Moderate (Daily Walks)</button>
-                    <button class="quiz-btn" onclick="nextQuizStep(3)">Very Active (Running/Hiking)</button>
+                    <button type="button" class="quiz-btn" onclick="nextQuizStep(3)">Couch Potato (Relaxed)</button>
+                    <button type="button" class="quiz-btn" onclick="nextQuizStep(3)">Moderate (Daily Walks)</button>
+                    <button type="button" class="quiz-btn" onclick="nextQuizStep(3)">Very Active (Running / Hiking)</button>
                 </div>
             </div>
             <div id="quizStep3" class="quiz-step" hidden>
@@ -54,9 +53,9 @@
             </div>
             <div id="quizResult" class="quiz-step" hidden>
                 <h3>Meet Your Matches!</h3>
-                <p>Based on your lifestyle, we recommend older dogs or cats. They thrive in relaxed environments.</p>
+                <p>Based on your lifestyle, we recommend older dogs or adult cats. They thrive wonderfully in your environment.</p>
                 <a href="adopt.html" class="btn" style="text-decoration:none;">View Matching Pets</a>
-                <button class="btn btn-outline" onclick="resetQuiz()" style="margin-left: 10px;">Retake Quiz</button>
+                <button type="button" class="btn btn-outline" onclick="resetQuiz()" style="margin-left: 10px;">Retake Quiz</button>
             </div>
         </div>
     </section>
@@ -67,82 +66,80 @@
         <p class="subtitle">These animals require immediate surgery or specialized care. Your micro-donations save lives.</p>
         
         <div class="urgent-grid">
-            <!-- Urgent Card 1 -->
-            <div class="urgent-card clay-panel reveal">
+            <div class="urgent-card clay-card reveal">
                 <div class="urgent-img">
-                    <img src="images/urgent-dog1.jpg" alt="A injured stray dog" loading="lazy" style="background:var(--blush);">
+                    <img src="images/urgent-dog1.jpg" alt="Injured stray dog" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=700&q=80'">
                     <span class="urgent-badge">Surgery Needed</span>
                 </div>
                 <div class="urgent-body">
                     <h3>Help Bruno Walk Again</h3>
-                    <p>Bruno was hit by a car and needs orthopedic surgery.</p>
+                    <p>Bruno was rescued beside a highway with a fractured leg and needs orthopedic surgery.</p>
                     <div class="fund-progress">
                         <div class="fund-stats">
-                            <span>₱12,500 raised</span>
-                            <span>Goal: ₱25,000</span>
+                            <span>&#8369;12,500 raised</span>
+                            <span>Goal: &#8369;25,000</span>
                         </div>
                         <div class="progress"><div class="progress-fill" style="width: 50%;"></div></div>
                     </div>
-                    <button type="button" class="btn" style="width: 100%; margin-top: 15px;" onclick="openAuthModal('Sign in to donate to Bruno')">Donate to Bruno</button>
+                    <button type="button" class="btn" style="width: 100%; margin-top: 18px;" onclick="openAuthModal('Sign in to donate to Bruno')">Donate to Bruno</button>
                 </div>
             </div>
             
-            <!-- Urgent Card 2 -->
-            <div class="urgent-card clay-panel reveal" style="animation-delay: 0.2s;">
+            <div class="urgent-card clay-card reveal" style="animation-delay: 0.2s;">
                 <div class="urgent-img">
-                    <img src="images/urgent-cat1.jpg" alt="A sick kitten" loading="lazy" style="background:var(--blush);">
+                    <img src="images/urgent-cat1.jpg" alt="Sick kitten" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=700&q=80'">
                     <span class="urgent-badge">ICU Care</span>
                 </div>
                 <div class="urgent-body">
                     <h3>Save Little Luna</h3>
-                    <p>Luna is fighting severe pneumonia and needs 24/7 oxygen therapy.</p>
+                    <p>Luna is fighting severe pneumonia and needs 24/7 oxygen incubator support.</p>
                     <div class="fund-progress">
                         <div class="fund-stats">
-                            <span>₱8,000 raised</span>
-                            <span>Goal: ₱10,000</span>
+                            <span>&#8369;8,000 raised</span>
+                            <span>Goal: &#8369;10,000</span>
                         </div>
                         <div class="progress"><div class="progress-fill" style="width: 80%;"></div></div>
                     </div>
-                    <button type="button" class="btn" style="width: 100%; margin-top: 15px;" onclick="openAuthModal('Sign in to donate to Luna')">Donate to Luna</button>
+                    <button type="button" class="btn" style="width: 100%; margin-top: 18px;" onclick="openAuthModal('Sign in to donate to Luna')">Donate to Luna</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 3. Virtual Fostering -->
+    <!-- 3. Virtual Fostering Tiers -->
     <section class="container">
         <h2 class="section-title">Virtual Fostering</h2>
         <p class="subtitle">Can't adopt right now? Sponsor an animal's daily care and get monthly photo updates.</p>
         
         <div class="foster-tiers reveal">
-            <div class="tier-card">
+            <div class="tier-card clay-card">
                 <h3>Treat Sponsor</h3>
-                <div class="tier-price">₱500 <span>/ month</span></div>
+                <div class="tier-price">&#8369;500 <span>/ month</span></div>
                 <ul>
                     <li>✓ Provides weekly treats & toys</li>
                     <li>✓ Monthly email update</li>
                 </ul>
-                <button type="button" class="btn btn-outline">Select Tier</button>
+                <button type="button" class="btn btn-outline" style="width:100%;">Select Tier</button>
             </div>
             <div class="tier-card featured clay-panel">
                 <span class="popular-tag">Most Impactful</span>
                 <h3>Care Guardian</h3>
-                <div class="tier-price">₱1,500 <span>/ month</span></div>
+                <div class="tier-price">&#8369;1,500 <span>/ month</span></div>
                 <ul>
                     <li>✓ Covers all food & basic meds</li>
                     <li>✓ Monthly photos & video updates</li>
                     <li>✓ PawForward Supporter Certificate</li>
                 </ul>
-                <button type="button" class="btn">Select Tier</button>
+                <button type="button" class="btn" style="width:100%;">Select Tier</button>
             </div>
-            <div class="tier-card">
+            <div class="tier-card clay-card">
                 <h3>Medical Angel</h3>
-                <div class="tier-price">₱3,000 <span>/ month</span></div>
+                <div class="tier-price">&#8369;3,000 <span>/ month</span></div>
                 <ul>
                     <li>✓ Covers specialized senior/medical care</li>
                     <li>✓ Direct video calls with your sponsor pet</li>
                 </ul>
-                <button type="button" class="btn btn-outline">Select Tier</button>
+                <button type="button" class="btn btn-outline" style="width:100%;">Select Tier</button>
             </div>
         </div>
     </section>
@@ -150,11 +147,11 @@
     <!-- 4. Volunteer Shift Scheduler -->
     <section class="container">
         <h2 class="section-title">Volunteer Shifts</h2>
-        <p class="subtitle">Claim a slot to walk dogs or help clean the shelter. (Log in required)</p>
+        <p class="subtitle">Claim a slot to walk dogs or help clean the shelter. (Sign-in required)</p>
         
         <div class="calendar-panel clay-panel reveal">
             <div class="calendar-header">
-                <h3>Next 7 Days</h3>
+                <h3>Next 4 Days Schedule</h3>
                 <div class="shift-legend">
                     <span class="legend-item"><span class="dot open"></span> Open</span>
                     <span class="legend-item"><span class="dot full"></span> Full</span>
@@ -163,50 +160,50 @@
             <div class="shift-grid">
                 <div class="shift-day">
                     <strong>Mon</strong>
-                    <button class="shift-slot open" onclick="claimShift(this)">8:00 AM</button>
-                    <button class="shift-slot full" disabled>4:00 PM</button>
+                    <button type="button" class="shift-slot open" onclick="claimShift(this)">8:00 AM</button>
+                    <button type="button" class="shift-slot full" disabled>4:00 PM</button>
                 </div>
                 <div class="shift-day">
                     <strong>Tue</strong>
-                    <button class="shift-slot open" onclick="claimShift(this)">8:00 AM</button>
-                    <button class="shift-slot open" onclick="claimShift(this)">4:00 PM</button>
+                    <button type="button" class="shift-slot open" onclick="claimShift(this)">8:00 AM</button>
+                    <button type="button" class="shift-slot open" onclick="claimShift(this)">4:00 PM</button>
                 </div>
                 <div class="shift-day">
                     <strong>Wed</strong>
-                    <button class="shift-slot full" disabled>8:00 AM</button>
-                    <button class="shift-slot full" disabled>4:00 PM</button>
+                    <button type="button" class="shift-slot full" disabled>8:00 AM</button>
+                    <button type="button" class="shift-slot full" disabled>4:00 PM</button>
                 </div>
                 <div class="shift-day">
                     <strong>Thu</strong>
-                    <button class="shift-slot open" onclick="claimShift(this)">8:00 AM</button>
-                    <button class="shift-slot open" onclick="claimShift(this)">4:00 PM</button>
+                    <button type="button" class="shift-slot open" onclick="claimShift(this)">8:00 AM</button>
+                    <button type="button" class="shift-slot open" onclick="claimShift(this)">4:00 PM</button>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- 5. Adoption Success Gallery -->
-    <section class="container" style="padding-bottom: 100px;">
+    <section class="container" style="padding-bottom: 80px;">
         <h2 class="section-title">Happy Tails Gallery</h2>
         <p class="subtitle">Real updates from families who found their best friends at PawForward.</p>
         
         <div class="success-gallery reveal">
             <div class="gallery-item">
-                <img src="images/success1.jpg" alt="Adopted dog with family" loading="lazy" style="background:var(--blush);">
+                <img src="images/success1.jpg" alt="Adopted dog with family" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=700&q=80'">
                 <div class="gallery-overlay">
                     <strong>Max (formerly Buster)</strong>
                     <p>"He loves his new backyard!" - The Santos Family</p>
                 </div>
             </div>
             <div class="gallery-item">
-                <img src="images/success2.jpg" alt="Adopted cat sleeping" loading="lazy" style="background:var(--blush);">
+                <img src="images/success2.jpg" alt="Adopted cat sleeping" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=700&q=80'">
                 <div class="gallery-overlay">
                     <strong>Nala</strong>
                     <p>"The cuddliest cat ever." - Elena R.</p>
                 </div>
             </div>
             <div class="gallery-item">
-                <img src="images/success3.jpg" alt="Two adopted dogs playing" loading="lazy" style="background:var(--blush);">
+                <img src="images/success3.jpg" alt="Two adopted dogs playing" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=700&q=80'">
                 <div class="gallery-overlay">
                     <strong>Rocky & Daisy</strong>
                     <p>"Adopted together, best friends forever."</p>
@@ -216,112 +213,10 @@
     </section>
 </main>
 
-<!-- Footer loads here -->
 <div id="footer-placeholder"></div>
 
-<!-- Modern Split-Screen Modal Overlay (Required for Login & Volunteer features) -->
-<div class="split-popup-overlay" id="overlay" style="display: none;">
-    <div class="split-popup-container" role="dialog" aria-modal="true" aria-labelledby="popTitle">
-        
-        <button type="button" class="close-modal-btn" id="closeBtn" aria-label="Close">&times;</button>
-
-        <!-- Left Side: Visual/Branding -->
-        <div class="auth-banner">
-            <div class="banner-content">
-                <div class="brand-logo">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
-                        <path d="M12 2c-5.33 0-8 4.5-8 8.25 0 2.25 1.5 4.75 3.5 4.75.5 0 1-.25 1.5-.75.75-.75 2-1.5 3-1.5s2.25.75 3 1.5c.5.5 1 .75 1.5.75 2 0 3.5-2.5 3.5-4.75C20 6.5 17.33 2 12 2zm-5 13.5c-1.5 0-3 1.5-3 3.5 0 2.5 2 4.5 4 4.5s4-2 4-4.5-1.5-3.5-5-3.5zm10 0c-3.5 0-5 1-5 3.5 0 2.5 2 4.5 4 4.5s4-2 4-4.5-1.5-3.5-3-3.5z"/>
-                    </svg>
-                    PawForward
-                </div>
-                <h2>Give every paw<br>a brighter future.</h2>
-                <p style="margin-top: 12px; font-size: 1.05rem; opacity: 0.9;">Join our community of rescuers, fosters, and animal lovers.</p>
-            </div>
-        </div>
-
-        <!-- Right Side: Forms -->
-        <div class="auth-panel">
-            <p class="notice" id="notice" role="status" hidden></p>
-
-            <section id="signInSection" class="form-container active">
-                <div class="form-header">
-                    <h3 id="popTitle">Welcome Back</h3>
-                    <p>Sign in to your PawForward account</p>
-                </div>
-                <form id="signInForm" novalidate>
-                    <div class="floating-group">
-                        <input type="email" id="email" placeholder=" " autocomplete="email" required>
-                        <label for="email">Email address</label>
-                    </div>
-                    <div class="floating-group">
-                        <input type="password" id="password" placeholder=" " autocomplete="current-password" required>
-                        <label for="password">Password</label>
-                        <button type="button" class="toggle-password" aria-label="Show password">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        </button>
-                    </div>
-                    <p class="form-error" id="signInError" role="alert" hidden></p>
-                    <button type="submit" class="submit-btn">Sign in</button>
-                </form>
-                <p class="switch-form">Don't have an account? <a href="#" id="showSignUp">Sign up</a></p>
-            </section>
-
-            <section id="signUpSection" class="form-container" hidden>
-                <div class="form-header">
-                    <h3>Create an account</h3>
-                    <p>Join the PawForward community</p>
-                </div>
-                <form id="signUpForm" novalidate>
-                    <div class="input-row">
-                        <div class="floating-group">
-                            <input type="text" id="fName" placeholder=" " autocomplete="given-name" required>
-                            <label for="fName">First name</label>
-                        </div>
-                        <div class="floating-group">
-                            <input type="text" id="lName" placeholder=" " autocomplete="family-name" required>
-                            <label for="lName">Last name</label>
-                        </div>
-                    </div>
-                    <div class="input-row">
-                        <div class="floating-group">
-                            <input type="date" id="dob" autocomplete="bday" required>
-                            <label for="dob" class="active-label">Date of birth</label>
-                        </div>
-                        <div class="floating-group">
-                            <input type="text" id="city" placeholder=" " autocomplete="address-level2" required>
-                            <label for="city">City</label>
-                        </div>
-                    </div>
-                    <div class="floating-group">
-                        <input type="email" id="signUpEmail" placeholder=" " autocomplete="email" required>
-                        <label for="signUpEmail">Email address</label>
-                    </div>
-                    <div class="floating-group">
-                        <input type="password" id="signUpPassword" placeholder=" " autocomplete="new-password" required>
-                        <label for="signUpPassword">Password (8+ chars)</label>
-                        <button type="button" class="toggle-password" aria-label="Show password">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        </button>
-                    </div>
-                    <div class="floating-group">
-                        <input type="password" id="confirmPassword" placeholder=" " autocomplete="new-password" required>
-                        <label for="confirmPassword">Confirm password</label>
-                        <button type="button" class="toggle-password" aria-label="Show password">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        </button>
-                    </div>
-                    <p class="form-error" id="signUpError" role="alert" hidden></p>
-                    <button type="submit" class="submit-btn">Create account</button>
-                </form>
-                <p class="switch-form">Already have an account? <a href="#" id="showSignIn">Sign in</a></p>
-            </section>
-        </div>
-    </div>
-</div>
-
-<script src="core.js"></script>
-<script src="layout.js"></script>
+<script src="Core.js"></script>
 <script src="script.js"></script>
-<script src="cart.js"></script>
+<script src="Cart.js"></script>
 </body>
 </html>

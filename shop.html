@@ -3,39 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PawForward | Shop</title>
+    <title>PawForward | Shelter Shop & Merchandise</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="header-mount"></div>
-<script src="layout.js"></script>
+<script src="Layout.js"></script>
 
 <section class="page-banner">
     <h1><span>Shop</span></h1>
-    <p>Every purchase pays for food and vet care for rescued animals.</p>
+    <p>Every purchase directly pays for food and vet care for rescued shelter animals.</p>
 </section>
 
 <section class="shop-wrap">
 <div class="container">
     <div class="perks">
-        <div class="perk">
+        <div class="perk clay-card">
             <span class="perk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg></span>
             <div><strong>Free shipping</strong><span>On orders over &#8369;1,000</span></div>
         </div>
-        <div class="perk">
+        <div class="perk clay-card">
             <span class="perk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
-            <div><strong>Funds rescues</strong><span>Proceeds go to animal care</span></div>
+            <div><strong>Funds rescues</strong><span>100% of proceeds go to animal care</span></div>
         </div>
-        <div class="perk">
+        <div class="perk clay-card">
             <span class="perk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
             <div><strong>Easy payments</strong><span>GCash, Maya, bank or card</span></div>
         </div>
     </div>
 
-    <div class="shop-toolbar">
+    <div class="shop-toolbar glass-panel">
         <div class="chips" id="chips" role="group" aria-label="Filter products">
             <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
             <button type="button" class="chip" data-filter="pets" aria-pressed="false">For pets</button>
@@ -57,19 +57,17 @@
 </section>
 
 <div id="footer-placeholder"></div>
-<script src="core.js"></script>
+<script src="Core.js"></script>
 <script src="script.js"></script>
-<script src="cart.js"></script>
+<script src="Cart.js"></script>
 <script>
-    // Sample products. Replace with your real ones (later this list will come from the back end).
-    // Photos go in images/shop-<id>.jpg
     const PRODUCTS = [
-        { id: "leash", name: "Dog leash",           cat: "pets",  price: 350, desc: "Strong, soft-grip nylon leash. 1.5 m." },
-        { id: "bowl",  name: "Pet food bowl",       cat: "pets",  price: 220, desc: "Non-slip stainless steel bowl." },
-        { id: "toy",   name: "Cat toy set",         cat: "pets",  price: 180, desc: "Five toys to keep curious cats busy." },
-        { id: "tote",  name: "Rescue paw tote bag", cat: "merch", price: 480, desc: "Sturdy canvas tote with our paw print.", badge: "Best seller" },
-        { id: "tee",   name: "PawForward T-shirt",  cat: "merch", price: 650, desc: "Soft cotton tee. Wear your support.", badge: "New" },
-        { id: "mug",   name: "Ceramic mug",         cat: "merch", price: 320, desc: "For coffee with a good cause." }
+        { id: "leash", name: "Dog leash",           cat: "pets",  price: 350, desc: "Strong, soft-grip nylon leash. 1.5 m.", fallback: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=700&q=80" },
+        { id: "bowl",  name: "Pet food bowl",       cat: "pets",  price: 220, desc: "Non-slip stainless steel bowl.", fallback: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=700&q=80" },
+        { id: "toy",   name: "Cat toy set",         cat: "pets",  price: 180, desc: "Five toys to keep curious cats busy.", fallback: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?auto=format&fit=crop&w=700&q=80" },
+        { id: "tote",  name: "Rescue paw tote bag", cat: "merch", price: 480, desc: "Sturdy canvas tote with our paw print.", badge: "Best seller", fallback: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=700&q=80" },
+        { id: "tee",   name: "PawForward T-shirt",  cat: "merch", price: 650, desc: "Soft cotton tee. Wear your support.", badge: "New", fallback: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=700&q=80" },
+        { id: "mug",   name: "Ceramic mug",         cat: "merch", price: 320, desc: "For coffee with a good cause.", fallback: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=700&q=80" }
     ];
     const CAT_LABEL = { pets: "For pets", merch: "Merch" };
     const peso = (n) => "\u20B1" + n.toLocaleString("en-US");
@@ -91,11 +89,15 @@
             card.dataset.cat = p.cat;
             card.style.setProperty("--i", i);
             card.innerHTML =
-                '<div class="item-img ph"><img loading="lazy" onerror="this.remove()"><span class="tag"></span></div>' +
+                '<div class="item-img"><img loading="lazy"><span class="tag"></span></div>' +
                 '<div class="item-body"><h3></h3><p class="desc"></p>' +
                 '<div class="buy-row"><span class="price"></span><button type="button" class="add-to-cart">' + PLUS + 'Add to cart</button></div></div>';
+            
             const img = card.querySelector("img");
-            img.src = "images/shop-" + p.id + ".jpg"; img.alt = p.name;
+            img.src = "images/shop-" + p.id + ".jpg";
+            img.alt = p.name;
+            img.onerror = function() { this.onerror = null; this.src = p.fallback; };
+
             card.querySelector(".tag").textContent = CAT_LABEL[p.cat];
             if (p.badge) { const f = document.createElement("span"); f.className = "flag"; f.textContent = p.badge; card.querySelector(".item-img").appendChild(f); }
             card.querySelector("h3").textContent = p.name;

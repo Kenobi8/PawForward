@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PawForward | Donate</title>
+    <title>PawForward | Donate & Fund Strays</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="header-mount"></div>
-<script src="layout.js"></script>
+<script src="Layout.js"></script>
 
 <section class="page-banner">
     <h1><span>Donate</span></h1>
-    <p>Help us reach our next milestone and keep rescued animals fed, healthy, and safe.</p>
+    <p>Help us reach our monthly milestone and keep rescued animals fed, vaccinated, and safe.</p>
 </section>
 
 <section class="container">
     <div class="donate-box card reveal">
         <div class="gate" id="gate" hidden>
             <strong>Sign in to donate</strong>
-            <p>Create a free account or sign in so we can thank you and keep your receipts in one place.</p>
-            <button type="button" class="btn" id="gateSignIn">Sign in or sign up</button>
-            <button type="button" class="btn btn-outline" id="gateGuest" hidden>Donate as a guest</button>
+            <p>Create a free account or sign in so we can thank you and keep your official tax receipts in one place.</p>
+            <button type="button" class="btn" id="gateSignIn">Sign in or create account</button>
+            <button type="button" class="btn btn-outline" id="gateGuest" hidden>Donate as guest</button>
         </div>
         <div class="field" id="guestField" hidden>
             <label for="guestEmail">Email for your receipt<span class="req" aria-hidden="true">*</span></label>
@@ -33,7 +33,7 @@
         </div>
 
         <div class="raised-wrap">
-            <p class="raised" id="raisedAmount">0</p>
+            <p class="raised" id="raisedAmount">&#8369;0</p>
             <p class="goal-text">raised of our <strong id="goalAmount"></strong> goal</p>
         </div>
 
@@ -70,7 +70,7 @@
 
 <section class="container" style="padding-top:0">
     <h2>Where your money goes</h2>
-    <p class="subtitle">We share how every peso is used, so you always know what your gift does.</p>
+    <p class="subtitle">We transparently share how every peso is used, so you always know what your gift achieves.</p>
     <div class="funds reveal">
         <div class="funds-bar" id="fundsBar"></div>
         <ul class="funds-legend" id="fundsLegend"></ul>
@@ -78,11 +78,11 @@
 </section>
 
 <div id="footer-placeholder"></div>
-<script src="core.js"></script>
+<script src="Core.js"></script>
 <script src="script.js"></script>
-<script src="cart.js"></script>
+<script src="Cart.js"></script>
 <script>
-    const CUR = "\u20B1";              // change to "$" if you prefer
+    const CUR = "\u20B1";
     const $ = (id) => document.getElementById(id);
     const fmt = (n) => CUR + Math.round(n).toLocaleString("en-US");
     let selected = 250;
@@ -116,7 +116,6 @@
 
     function say(text) { const t = $("thanks"); t.textContent = text; t.classList.add("show"); }
 
-    // Signed-out visitors can look around but cannot donate
     function applyGate() {
         const user = Auth.current();
         const open = !!user || guestMode;
@@ -144,7 +143,7 @@
         showImpact(selected);
     });
 
-    $("donateBtn").addEventListener("click", () => {
+    $("donateBtn").addEventListener("click", async () => {
         const user = Auth.current();
         if (!user && !guestMode) { openAuth("Please sign in to donate."); return; }
         if (!(selected > 0)) { say("Choose or enter an amount to donate."); return; }
@@ -160,12 +159,22 @@
         render(before);
         const rec = makeDonation({ amount: selected, method: pay.label(), email: email, name: user ? Auth.name() : "" });
         if (user) UserData.addDonation(rec);
+        
+        // Trigger automated thank-you email
+        if (window.PawFirebase) {
+            await window.PawFirebase.sendAutomatedEmail({
+                to_email: email,
+                to_name: user ? user.firstName : "Supporter",
+                subject: `PawForward Official Donation Receipt (${rec.id})`,
+                message: `Thank you for your generous contribution of ₱${selected.toLocaleString()} via ${pay.label()}! Receipt No: ${rec.id}. Your gift directly supports shelter food, vaccines, and medical rescue operations.`
+            });
+        }
+
         say("Thank you" + (user ? ", " + Auth.name() : "") + "! Your " + fmt(selected) + " gift moves us closer to our goal.");
         toast("Thank you! " + fmt(selected) + " donated.", { action: { label: "View receipt", onClick: () => openReceipt(rec) } });
         $("customAmount").value = "";
     });
 
-    // Arriving from the homepage widget with ?amount=500
     const fromUrl = parseFloat(new URLSearchParams(location.search).get("amount"));
     if (fromUrl > 0) {
         const preset = document.querySelector('.amount-btn[data-amount="' + fromUrl + '"]');

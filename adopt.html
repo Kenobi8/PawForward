@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PawForward | Adopt</title>
+    <title>PawForward | Adopt a Rescue Pet</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="header-mount"></div>
-<script src="layout.js"></script>
+<script src="Layout.js"></script>
 
 <section class="page-banner">
     <h1><span>Adopt</span></h1>
-    <p>These animals are healthy, vaccinated, and ready for a family.</p>
+    <p>These animals are healthy, vaccinated, and ready for a loving family.</p>
 </section>
 
 <section class="container">
-    <div class="steps">
-        <div class="step"><h3>Meet</h3><p>Pick an animal and send us a message about them.</p></div>
-        <div class="step"><h3>Visit</h3><p>Come to the shelter to spend time together.</p></div>
+    <div class="steps clay-panel">
+        <div class="step"><h3>Meet</h3><p>Explore full profiles and send an adoption inquiry online.</p></div>
+        <div class="step"><h3>Visit</h3><p>Come to the shelter to spend time together in person.</p></div>
         <div class="step"><h3>Take them home</h3><p>We finish the paperwork and check in after a few weeks.</p></div>
     </div>
 </section>
 
-<section class="container" style="padding-top:20px">
+<section class="container" style="padding-top:10px">
     <h2>Animals looking for a home</h2>
     <p class="subtitle">Animals who have waited more than 90 days are marked <strong>Hidden Gem</strong> and shown first.</p>
-    <div class="filters" id="filters">
+    
+    <div class="filters glass-panel" id="filters">
         <div class="filter-group" data-group="type">
             <span class="filter-label" id="fl-type">Type</span>
             <div class="chips" role="group" aria-labelledby="fl-type">
@@ -60,64 +61,15 @@
             <button type="button" class="link-btn" id="clearFilters">Clear filters</button>
         </div>
     </div>
+
     <p class="result-count" id="resultCount" aria-live="polite"></p>
     <div class="animal-grid" id="animalGrid"></div>
 </section>
 
 <div id="footer-placeholder"></div>
 
-<!-- Standard Scripts -->
-<script src="core.js"></script>
+<script src="Core.js"></script>
 <script src="script.js"></script>
-<script src="cart.js"></script>
-
-<!-- Live Cloud Database Script -->
-<script type="module">
-    import { db } from "./firebase-config.js";
-    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    async function loadAdoptableAnimals() {
-        const grid = document.getElementById("animalGrid");
-        if (!grid) return;
-
-        try {
-            grid.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Loading adorable pets from the cloud...</p>";
-            
-            const querySnapshot = await getDocs(collection(db, "animals"));
-            grid.innerHTML = ""; // Clear loading message
-
-            if (querySnapshot.empty) {
-                grid.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>No animals currently listed in the cloud database.</p>";
-                return;
-            }
-
-            querySnapshot.forEach((doc) => {
-                const pet = doc.data();
-                
-                // Build the card matching your site's design
-                const card = document.createElement("div");
-                card.className = "animal-card clay-panel";
-                card.innerHTML = `
-                    <div class="animal-img" style="background: var(--blush, #fce4e4); height: 200px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
-                        🐾
-                    </div>
-                    <div class="animal-body" style="padding: 20px;">
-                        <h3>${pet.name || "Unnamed Pet"}</h3>
-                        <p style="margin: 8px 0;"><strong>Type:</strong> ${pet.type || "General"}</p>
-                        <p style="margin: 8px 0;"><strong>Status:</strong> <span style="color: #2e7d32; font-weight: bold;">${pet.status || "Available"}</span></p>
-                        <a href="contact.html" class="btn" style="display: block; text-align: center; margin-top: 15px; text-decoration: none;">Adopt ${pet.name}</a>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        } catch (error) {
-            console.error("Error loading cloud animals:", error);
-            grid.innerHTML = "<p style='text-align:center; grid-column: 1/-1; color: red;'>Failed to load animals from cloud.</p>";
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", loadAdoptableAnimals);
-</script>
-
+<script src="Cart.js"></script>
 </body>
 </html>

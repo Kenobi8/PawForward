@@ -1,22 +1,228 @@
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+const SUPABASE_URL = "https://crzzcsrdvmafpzvrkoyx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Is6c7sQU-hGdrHxmOdZH9w_t-yvKk-m";
 
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCces9tCAbFZ9HIBkjGcbbGsODRnzgolzo",
-    authDomain: "pawforward-e9702.firebaseapp.com",
-    projectId: "pawforward-e9702",
-    storageBucket: "pawforward-e9702.firebasestorage.app",
-    messagingSenderId: "228031703250",
-    appId: "1:228031703250:web:21bcf44364910261f3250b",
-    measurementId: "G-6FQ5DERN7R"
+export const CREATOR_ADMIN_EMAILS = [
+    "admin@pawforward.org",
+    "silasmasbad20@gmail.com",
+    "hello@pawforward.org",
+    "snakeflash154@gmail.com",
+    "advinculajared08@gmail.com"
+];
+
+export async function verifyAdminAccess(user) {
+    if (!user || !user.email) return false;
+    const cleanEmail = user.email.trim().toLowerCase();
+    if (CREATOR_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(cleanEmail)) {
+        return true;
+    }
+    try {
+        const { data, error } = await supabase
+            .from("users")
+            .select("role")
+            .eq("uid", user.id)
+            .single();
+        return !error && data && data.role === "admin";
+    } catch (err) {
+        return false;
+    }
+}
+
+export const EMAIL_CONFIG = {
+    enabled: false,
+    serviceId: "YOUR_EMAILJS_SERVICE_ID",
+    templateId: "YOUR_EMAILJS_TEMPLATE_ID",
+    publicKey: "YOUR_EMAILJS_PUBLIC_KEY",
+    adminInbox: "hello@pawforward.org"
 };
 
- 
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export const analytics = getAnalytics(app);
+export async function sendAutomatedEmail({ to_email, to_name, subject, message, reply_to }) {
+    try {
+        await supabase.from("mail_logs").insert([{
+            to_email: to_email || EMAIL_CONFIG.adminInbox,
+            to_name: to_name || "PawForward User",
+            subject: subject || "PawForward Notification",
+            message: message || "",
+            reply_to: reply_to || EMAIL_CONFIG.adminInbox,
+            createdAt: new Date().toISOString()
+        }]);
+    } catch (e) {}
+
+    if (!EMAIL_CONFIG.enabled || EMAIL_CONFIG.publicKey === "YOUR_EMAILJS_PUBLIC_KEY") {
+        return { ok: true, simulated: true };
+    }
+
+    try {
+        const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                service_id: EMAIL_CONFIG.serviceId,
+                template_id: EMAIL_CONFIG.templateId,
+                user_id: EMAIL_CONFIG.publicKey,
+                template_params: {
+                    to_email: to_email || EMAIL_CONFIG.adminInbox,
+                    to_name: to_name || "Supporter",
+                    subject: subject,
+                    message: message,
+                    reply_to: reply_to || EMAIL_CONFIG.adminInbox
+                }
+            })
+        });
+        return { ok: response.ok };
+    } catch (error) {
+        return { ok: false, error: error.message };
+    }
+}
+
+// Keeps the name PawFirebase so your HTML and UI scripts work without changes
+window.PawFirebase = {
+    supabase,
+    verifyAdminAccess,
+    sendAutomatedEmail,
+
+    async login(email, password) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password: password
+        });
+        if (error) {
+            alert("Login Failed: " + error.message);
+            const verifyBtn = document.querySelector('button[type="submit"]');
+            if (verifyBtn) verifyBtn.textContent = "Sign In";
+            throw error;
+        }
+        const user = { ...data.user, uid: data.user.id };
+        const isAdmin = await verifyAdminAccess(user);
+        localStorage.setItem("paw_user_role", isAdmin ? "admin" : "user");
+        return { user, isAdmin };
+    },
+
+    async register(email, password, profile = {}) {
+        const { data, error } = await supabase.auth.signUp({
+            email: email.trim(),
+            password: password
+        });
+        if (error) {
+            alert("Registration Failed: " + error.message);
+            const verifyBtn = document.querySelector('button[type="submit"]');
+            if (verifyBtn) verifyBtn.textContent = "Create Account";
+            throw error;
+        }
+        const user = { ...data.user, uid: data.user.id };
+        const isAdmin = await verifyAdminAccess(user);
+        const defaultName = profile.firstName || user.email.split("@")[0];
+        const userRecord = {
+            uid: user.id,
+            email: user.email.toLowerCase(),
+            firstName: defaultName.charAt(0).toUpperCase() + defaultName.slice(1),
+            lastName: profile.lastName || "",
+            city: profile.city || "",
+            phone: profile.phone || "",
+            role: isAdmin ? "admin" : "adopter",
+            createdAt: new Date().toISOString()
+        };
+
+        try {
+            await supabase.from("users").upsert([userRecord]);
+        } catch (e) {}
+
+        localStorage.setItem("paw_user_role", isAdmin ? "admin" : "user");
+        return { user, isAdmin, userRecord };
+    },
+
+    async logout() {
+        try { await supabase.auth.signOut(); } catch (e) {}
+        localStorage.removeItem("paw_user_role");
+        localStorage.removeItem("pawforwardSession");
+    },
+
+    async resetPasswordEmail(email) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+        if (error) throw error;
+    },
+
+    async submitInquiryToCloud(data) {
+        const payload = {
+            name: data.name || "Supporter",
+            email: (data.email || "").toLowerCase().trim(),
+            topic: data.topic || "Adopting a pet",
+            pet: data.pet || "General Shelter Inquiry",
+            message: data.message || "",
+            status: "Pending Review",
+            createdAt: new Date().toISOString()
+        };
+        const { data: inserted, error } = await supabase
+            .from("inquiries")
+            .insert([payload])
+            .select()
+            .single();
+        if (error) throw error;
+        return { id: inserted.id, ...payload };
+    },
+
+    async fetchUserInquiriesFromCloud(email) {
+        if (!email) return [];
+        try {
+            const { data, error } = await supabase
+                .from("inquiries")
+                .select("*")
+                .ilike("email", email.trim())
+                .order("createdAt", { ascending: false });
+            if (error || !data) return [];
+            return data.map(item => ({
+                id: item.id,
+                topic: item.topic || "Adopting a pet",
+                pet: item.pet || "",
+                message: item.message || "",
+                status: item.status || "Pending Review",
+                date: item.createdAt || new Date().toISOString()
+            }));
+        } catch (e) {
+            return [];
+        }
+    },
+
+    async fetchCloudAnimals() {
+        try {
+            const { data, error } = await supabase.from("animals").select("*");
+            if (error || !data) return [];
+            return data.map(a => ({
+                id: a.id,
+                name: a.name || "Unnamed Pet",
+                type: a.type || "Dog",
+                sex: a.sex || "Male",
+                ageMonths: Number(a.ageMonths) || 18,
+                status: a.status || "Available",
+                arrivalDate: a.arrivalDate || new Date(Date.now() - 25 * 86400000).toISOString().slice(0, 10),
+                img: a.img || "",
+                desc: a.desc || "Healthy, vaccinated, and waiting for a loving family at PawForward."
+            }));
+        } catch (err) {
+            return [];
+        }
+    }
+};
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+    const fbUser = session?.user;
+    if (fbUser) {
+        const isAdmin = await verifyAdminAccess(fbUser);
+        localStorage.setItem("paw_user_role", isAdmin ? "admin" : "user");
+        const currentLocal = JSON.parse(localStorage.getItem("pawforwardSession") || "null");
+        const fallbackFirst = fbUser.email.split("@")[0];
+        localStorage.setItem("pawforwardSession", JSON.stringify({
+            uid: fbUser.id,
+            email: fbUser.email.toLowerCase(),
+            firstName: (currentLocal && currentLocal.firstName) ? currentLocal.firstName : (fallbackFirst.charAt(0).toUpperCase() + fallbackFirst.slice(1)),
+            role: isAdmin ? "admin" : "user"
+        }));
+    } else {
+        localStorage.removeItem("paw_user_role");
+        localStorage.removeItem("pawforwardSession");
+    }
+    window.dispatchEvent(new Event("authchange"));
+});

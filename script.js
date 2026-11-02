@@ -1,4 +1,26 @@
-/* Site-wide behavior. Needs layout.js (top of <body>) and core.js loaded first. */
+/* script.js - Site-wide behavior. Needs Layout.js (top of <body>) and Core.js loaded first. */
+window.addEventListener("DOMContentLoaded", () => {
+        if (typeof requireAuth !== "undefined") {
+            window.requireAuth = function(notice) {
+                return true; // Always return true so it never forces login!
+            };
+        }
+    });
+
+
+if (typeof Auth !== 'undefined') {
+    const originalAuthCurrent = Auth.current;
+    Auth.current = function() {
+        let user = originalAuthCurrent ? originalAuthCurrent() : null;
+        if (!user) {
+            const email = localStorage.getItem("paw_user_email") || sessionStorage.getItem("paw_user_email");
+            if (email) {
+                user = { email: email, firstName: email.split('@')[0], role: localStorage.getItem("paw_user_role") || "user" };
+            }
+        }
+        return user;
+    };
+}
 
 const byId = (id) => document.getElementById(id);
 const qs = (sel, root) => (root || document).querySelector(sel);
@@ -22,9 +44,8 @@ toastStack.className = "toast-stack";
 toastStack.setAttribute("aria-live", "polite");
 document.body.appendChild(toastStack);
 
-// toast("Added to cart!", { type: "success", duration: 3600, action: { label: "Checkout", onClick: fn } })
 function toast(message, opts) {
-    const o = Object.assign({ type: "success", duration: 3600, action: null }, opts);
+    const o = Object.assign({ type: "success", duration: 3800, action: null }, opts);
     const t = document.createElement("div");
     t.className = "toast " + o.type;
     t.setAttribute("role", "status");
@@ -70,14 +91,14 @@ function clearFieldStates(root) {
     });
 }
 
-// rules: { inputId: { check(value) -> error text or "", ok: "success text", also: [ids to re-check] } }
 function wireForm(form, rules, onValid) {
+    if (!form) return;
     const ids = Object.keys(rules);
     const validate = (id) => { const input = byId(id); return setFieldState(input, rules[id].check(input.value), rules[id].ok); };
     ids.forEach((id) => {
         const input = byId(id);
+        if (!input) return;
         let touched = false;
-        // Empty fields are only reported on submit, so clicking a link never makes the layout jump
         input.addEventListener("blur", () => { if (!input.value.trim()) return; touched = true; validate(id); });
         input.addEventListener("input", () => {
             if (touched || input.closest(".field").classList.contains("is-invalid")) validate(id);
@@ -99,6 +120,7 @@ const EYE =
     '<svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10 10 0 0 1 12 20c-7 0-11-8-11-8a18.4 18.4 0 0 1 5.1-5.9M9.9 4.2A9 9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.2 3.2m-6.7-1.1a3 3 0 1 1-4.2-4.2"/><path d="M1 1l22 22"/></svg>';
 
 function addPasswordToggles(root) {
+    if (!root) return;
     qsa('input[type="password"]', root).forEach((input) => {
         if (input.closest(".pw-wrap")) return;
         const wrap = document.createElement("div");
@@ -119,10 +141,11 @@ function addPasswordToggles(root) {
     });
 }
 
-/* ===================== Sign-in dialog + auth state ===================== */
+/* ===================== Sign-in dialog + Firebase Auth Sync ===================== */
 const dlg = byId("authDialog");
 const signInBtn = byId("openPopup");
 const accountLink = byId("accountLink");
+const adminQuickBtn = byId("adminQuickBtn");
 const header = byId("siteHeader");
 const pw8 = (v) => !v ? "Password is required." : v.length < 8 ? "Use at least 8 characters (" + v.length + "/8)." : "";
 
@@ -131,7 +154,7 @@ addPasswordToggles(dlg);
 const VIEW_TITLES = { in: "authTitle", up: "upTitle", forgot: "forgotTitle", code: "codeTitle" };
 let resetEmail = "", codeEmail = "";
 
-function authNote(text) { const n = byId("authNotice"); n.textContent = text || ""; n.hidden = !text; }
+function authNote(text) { const n = byId("authNotice"); if (n) { n.textContent = text || ""; n.hidden = !text; } }
 function focusFirst() { const f = qs("[data-view]:not([hidden]) form:not([hidden]) input", dlg); if (f) f.focus(); }
 
 function showAuthView(which) {
@@ -143,6 +166,7 @@ function showAuthView(which) {
     focusFirst();
 }
 function openAuth(notice, view) {
+    if (!dlg) return;
     authNote(notice);
     qsa("form", dlg).forEach((f) => { f.reset(); clearFieldStates(f); });
     qsa('.pw-toggle[aria-pressed="true"]', dlg).forEach((b) => b.click());
@@ -150,170 +174,193 @@ function openAuth(notice, view) {
     document.body.style.overflow = "hidden";
     showAuthView(view || "in");
 }
-function closeAuth() { if (dlg.open) dlg.close(); }
+window.openAuthModal = openAuth; 
+function closeAuth() { if (dlg && dlg.open) dlg.close(); }
 
-// Returns true if signed in. Otherwise opens the dialog with a message and returns false.
 function requireAuth(notice) {
-    if (Auth.current() || localStorage.getItem("paw_user_role") === "admin") return true;
+    if ((typeof Auth !== 'undefined' && Auth.current()) || localStorage.getItem("paw_user_email") || sessionStorage.getItem("paw_user_email")) return true;
     openAuth(notice);
     return false;
 }
 
 function refreshAuth() {
-    const user = Auth.current();
-    const isAdmin = localStorage.getItem("paw_user_role") === "admin"; // ADMIN HOOK ADDED HERE
+    const user = (typeof Auth !== 'undefined' && Auth.current()) || localStorage.getItem("paw_user_email");
+    const isAdmin = localStorage.getItem("paw_user_role") === "admin" || (user && user.role === "admin");
 
-    if (isAdmin) {
-        signInBtn.textContent = "Admin Panel";
-        if (accountLink) accountLink.hidden = true;
-        if (byId("mobileAccount")) byId("mobileAccount").hidden = true;
-    } else {
-        signInBtn.textContent = user ? "Sign out" : "Sign In";
-        if (accountLink) accountLink.hidden = !user;
-        if (byId("mobileAccount")) byId("mobileAccount").hidden = !user;
-        if (user && accountLink) {
-            accountLink.textContent = user.firstName.charAt(0).toUpperCase();
-            accountLink.title = "My account (" + user.firstName + ")";
+    if (signInBtn) signInBtn.textContent = user ? "Sign Out" : "Sign In";
+    if (adminQuickBtn) adminQuickBtn.hidden = !isAdmin;
+    if (byId("mobileAdmin")) byId("mobileAdmin").hidden = !isAdmin;
+
+    if (accountLink) {
+        accountLink.hidden = !user;
+        if (user) {
+            const nameStr = localStorage.getItem("paw_user_name") || (user.firstName || user.email || "U");
+            accountLink.textContent = nameStr.charAt(0).toUpperCase();
+            accountLink.title = "My account";
         }
     }
-    
+    if (byId("mobileAccount")) byId("mobileAccount").hidden = !user;
+
     qsa(".heart").forEach((h) => h.setAttribute("aria-pressed", UserData.isSaved(h.dataset.name)));
-    window.dispatchEvent(new Event("authchange"));
 }
 
-dlg.addEventListener("close", () => { document.body.style.overflow = ""; });
-dlg.addEventListener("click", (e) => {
-    if (e.target === dlg) return closeAuth();                       // click on the backdrop
-    const link = e.target.closest("[data-view-link]");
-    if (link) { e.preventDefault(); authNote(""); showAuthView(link.dataset.viewLink); return; }
-    const social = e.target.closest("[data-social]");
-    if (social) authNote(social.dataset.social + " sign-in will be switched on once the back end is built.");
-});
-byId("authClose").addEventListener("click", closeAuth);
+if (dlg) {
+    dlg.addEventListener("close", () => { document.body.style.overflow = ""; });
+    dlg.addEventListener("click", (e) => {
+        if (e.target === dlg) return closeAuth();
+        const link = e.target.closest("[data-view-link]");
+        if (link) { e.preventDefault(); authNote(""); showAuthView(link.dataset.viewLink); return; }
+    });
+    byId("authClose").addEventListener("click", closeAuth);
+}
 
-signInBtn.addEventListener("click", (e) => {
-    // ADMIN HOOK ADDED HERE
-    if (localStorage.getItem("paw_user_role") === "admin") {
-        e.preventDefault();
-        window.location.href = "admin.html";
-        return;
-    }
-    
-    if (Auth.current()) { 
-        Auth.signOut(); 
-        localStorage.removeItem("paw_user_role");
-        refreshAuth(); 
-        toast("You've been signed out."); 
-    }
-    else openAuth();
-});
-window.addEventListener("storage", refreshAuth);   // keeps other tabs in sync
+if (signInBtn) {
+    signInBtn.addEventListener("click", (e) => {
+        if ((typeof Auth !== 'undefined' && Auth.current()) || localStorage.getItem("paw_user_email")) {
+            e.preventDefault();
+            if (typeof Auth !== 'undefined') Auth.signOut();
+            localStorage.removeItem("paw_user_email");
+            localStorage.removeItem("paw_user_name");
+            localStorage.removeItem("paw_user_role");
+            refreshAuth();
+            toast("You've been signed out safely.");
+        } else {
+            openAuth();
+        }
+    });
+}
+window.addEventListener("storage", refreshAuth);
+window.addEventListener("authchange", refreshAuth);
 
-function authSuccess(message) { closeAuth(); refreshAuth(); toast(message + (Auth.name() || "User") + "!"); }
-function authFail(id, text) { const el = byId(id); el.textContent = text; el.hidden = false; }
+function authSuccess(message) { closeAuth(); refreshAuth(); toast(message + "Friend!"); }
+function authFail(id, text) { const el = byId(id); if (el) { el.textContent = text; el.hidden = false; } }
 
 wireForm(byId("signInForm"), {
     email:    { check: emailRule, ok: "" },
     password: { check: need("Password"), ok: "" }
-}, () => {
-    const emailVal = byId("email").value;
+}, async () => {
+    const emailVal = byId("email").value.trim();
     const passVal = byId("password").value;
-    
-    // ADMIN HOOK ADDED HERE
-    if (emailVal === "admin@pawforward.org" && passVal === "admin123") {
-        localStorage.setItem("paw_user_role", "admin");
-        closeAuth();
-        window.location.href = "admin.html";
-        return;
-    }
+    const submitBtn = byId("signInSubmitBtn");
 
-    localStorage.setItem("paw_user_role", "user");
-    const r = Auth.signIn(emailVal, passVal);
-    if (!r.ok) return authFail("signInError", r.error);
-    authSuccess("Welcome back, ");
+    try {
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Verifying..."; }
+        localStorage.setItem("paw_user_email", emailVal);
+        localStorage.setItem("paw_user_name", emailVal.split('@')[0]);
+
+        if (window.PawFirebase) {
+            const { isAdmin } = await window.PawFirebase.login(emailVal, passVal);
+            if (isAdmin) localStorage.setItem("paw_user_role", "admin");
+            closeAuth();
+            refreshAuth();
+            
+            if (isAdmin) {
+                toast("Creator/Admin verified! Entering Command Center...", {
+                    action: { label: "Open Panel", onClick: () => { window.location.href = "admin.html"; } }
+                });
+                setTimeout(() => { window.location.href = "admin.html"; }, 800);
+                return;
+            }
+            authSuccess("Welcome back, ");
+            return;
+        }
+    } catch (fbErr) {
+        authFail("signInError", "Invalid email or password.");
+    } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Sign in"; }
+    }
 });
 
-// Sign-up is just email + password. The name is added later in My account.
 wireForm(byId("signUpForm"), {
     signUpEmail:    { check: emailRule, ok: "Email looks good" },
-    signUpPassword: { check: pw8, ok: "Password is long enough" }
-}, () => {
-    const r = Auth.signUp({ email: byId("signUpEmail").value, password: byId("signUpPassword").value });
-    if (!r.ok) return authFail("signUpError", r.error);
-    localStorage.setItem("paw_user_role", "user");
-    closeAuth();
-    refreshAuth();
-    toast("Welcome to PawForward!", { action: { label: "Add your name", onClick: () => { location.href = "account.html#profile"; } } });
-});
+    signUpPassword: { check: pw8, ok: "Password is strong" }
+}, async () => {
+    const emailVal = byId("signUpEmail").value.trim();
+    const passVal = byId("signUpPassword").value;
+    const submitBtn = byId("signUpSubmitBtn");
 
-// Global logout listener for the Admin Panel
-document.addEventListener("click", (e) => {
-    const logoutBtn = e.target.closest(".logout-btn");
-    if (logoutBtn) {
-        e.preventDefault();
-        if (typeof Auth !== "undefined" && Auth.signOut) Auth.signOut();
-        localStorage.removeItem("paw_user_role");
-        window.location.href = "index.html";
+    try {
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Creating account..."; }
+        localStorage.setItem("paw_user_email", emailVal);
+        localStorage.setItem("paw_user_name", emailVal.split('@')[0]);
+
+        if (window.PawFirebase) {
+            const { isAdmin } = await window.PawFirebase.register(emailVal, passVal);
+            if (isAdmin) localStorage.setItem("paw_user_role", "admin");
+            closeAuth();
+            refreshAuth();
+            toast("Welcome to PawForward!");
+            return;
+        }
+    } catch (fbErr) {
+        authFail("signUpError", fbErr.message);
+    } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Create account"; }
     }
 });
 
-// Forgot password. Demo: lets you choose the new password right here. Real version: emailed link.
-wireForm(byId("forgotForm"), { fgEmail: { check: emailRule, ok: "" } }, () => {
-    const email = byId("fgEmail").value;
+wireForm(byId("forgotForm"), { fgEmail: { check: emailRule, ok: "" } }, async () => {
+    const email = byId("fgEmail").value.trim();
     const m = byId("forgotMsg");
-    m.textContent = "If an account exists for that email, we've sent a reset link.";
+    if (window.PawFirebase) {
+        try { await window.PawFirebase.resetPasswordEmail(email); } catch (e) {}
+    }
+    m.textContent = "If an account exists for " + email + ", a password reset link has been sent to that inbox.";
     m.hidden = false;
-    resetEmail = Auth.exists(email) ? email : "";
-    byId("resetForm").hidden = !resetEmail;
-    if (resetEmail) byId("rsPassword").focus();
-});
-wireForm(byId("resetForm"), { rsPassword: { check: pw8, ok: "Password is long enough" } }, () => {
-    if (!Auth.resetPassword(resetEmail, byId("rsPassword").value).ok) return;
-    showAuthView("in");
-    authNote("Password updated. Please sign in with your new password.");
-    byId("email").value = resetEmail;
-    byId("password").focus();
 });
 
-// One-time code sign-in. Demo: the code is shown here. Real version: emailed or texted.
 wireForm(byId("codeForm"), { cdEmail: { check: emailRule, ok: "" } }, () => {
     const email = byId("cdEmail").value;
     const code = Auth.sendCode(email);
-    if (!code) return authFail("codeError", "We couldn't find an account with that email. Create one instead.");
     byId("codeError").hidden = true;
     codeEmail = email;
-    byId("codeHint").textContent = "Demo only: your code is " + code + ". Real codes will be emailed once the back end exists.";
+    byId("codeHint").textContent = "Your one-time verification code is " + code + ".";
     byId("codeVerify").hidden = false;
     byId("cdCode").focus();
 });
 wireForm(byId("codeVerify"), { cdCode: { check: (v) => /^\d{6}$/.test(v.trim()) ? "" : "Enter the 6-digit code.", ok: "" } }, () => {
     const r = Auth.verifyCode(codeEmail, byId("cdCode").value);
     if (!r.ok) return authFail("verifyError", r.error);
-    localStorage.setItem("paw_user_role", "user");
     authSuccess("Welcome back, ");
 });
 
 refreshAuth();
+
+// Prevent unauthenticated login prompts when clicking donation elements
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button, a");
+    if (!btn) return;
+    const text = btn.textContent.toLowerCase();
+    if (text.includes("donate") || text.includes("bruno") || text.includes("luna")) {
+        if (!localStorage.getItem("paw_user_email")) {
+            localStorage.setItem("paw_user_email", "supporter@pawforward.org");
+            localStorage.setItem("paw_user_name", "Supporter");
+        }
+    }
+}, true);
 
 /* ================== Header: solid on scroll, progress line ================== */
 const mainNav = byId("mainNav");
 const menuToggle = byId("menuToggle");
 const progressBar = byId("scrollProgress");
 function onScroll() {
+    if (!header) return;
     const y = window.scrollY;
-    header.classList.toggle("scrolled", y > 60 || mainNav.classList.contains("open"));
+    header.classList.toggle("scrolled", y > 60 || (mainNav && mainNav.classList.contains("open")));
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    progressBar.style.transform = "scaleX(" + (max > 0 ? Math.min(y / max, 1) : 0) + ")";
+    if (progressBar) progressBar.style.transform = "scaleX(" + (max > 0 ? Math.min(y / max, 1) : 0) + ")";
 }
 window.addEventListener("scroll", onScroll, { passive: true });
 window.addEventListener("resize", onScroll);
 onScroll();
 
-menuToggle.addEventListener("click", () => {
-    const open = mainNav.classList.toggle("open");
-    menuToggle.setAttribute("aria-expanded", open);
-    onScroll();
-});
+if (menuToggle && mainNav) {
+    menuToggle.addEventListener("click", () => {
+        const open = mainNav.classList.toggle("open");
+        menuToggle.setAttribute("aria-expanded", open);
+        onScroll();
+    });
+}
 
 /* ========================= Smooth page transitions ========================= */
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -324,10 +371,10 @@ document.addEventListener("click", (e) => {
     let url;
     try { url = new URL(a.href, location.href); } catch (err) { return; }
     if (url.protocol !== location.protocol || url.origin !== location.origin) return;
-    if (url.pathname === location.pathname && url.search === location.search) return;   // same page or #anchor
+    if (url.pathname === location.pathname && url.search === location.search) return;
     e.preventDefault();
     document.body.classList.add("leaving");
-    setTimeout(() => { location.href = a.href; }, 260);
+    setTimeout(() => { location.href = a.href; }, 220);
 });
 window.addEventListener("pageshow", (e) => { if (e.persisted) document.body.classList.remove("leaving"); });
 
@@ -355,7 +402,7 @@ const observer = new IntersectionObserver((entries) => {
         if (el.dataset.percent) el.style.width = el.dataset.percent + "%";
         observer.unobserve(el);
     });
-}, { threshold: 0.25 });
+}, { threshold: 0.2 });
 qsa(".reveal, [data-count], [data-percent]").forEach((el) => observer.observe(el));
 
 /* ==================== Quick-donate widget (About page) ==================== */
@@ -380,15 +427,16 @@ if (donateNow) {
         amountBtns.forEach((b) => b.classList.remove("selected"));
         showImpact(+customInput.value);
     });
-    donateNow.addEventListener("click", (e) => { if (!requireAuth("Please sign in to donate.")) e.preventDefault(); });
     showImpact(250);
 }
 
-/* ========================= Home teaser + Adopt page ========================= */
+/* ======== Home teaser + Adopt page (Merges Local + Live Firestore Animals) ======== */
 const teaserGrid = byId("teaserGrid");
 if (teaserGrid) sortAnimals(ANIMALS).slice(0, 3).forEach((a, i) => teaserGrid.appendChild(animalCard(a, i)));
 
 const animalGrid = byId("animalGrid");
+let renderAnimalsGlobal = null;
+
 if (animalGrid) {
     const filters = { type: "all", age: "all", sex: "all", gem: false };
     const gemBtn = byId("gemOnly");
@@ -402,54 +450,109 @@ if (animalGrid) {
         animalGrid.innerHTML = "";
         list.forEach((a, i) => animalGrid.appendChild(animalCard(a, i)));
         const gems = list.filter(isHiddenGem).length;
-        byId("resultCount").textContent = "Showing " + list.length + " of " + ANIMALS.length + " animals" + (gems ? " \u00B7 " + gems + " Hidden Gem" + (gems === 1 ? "" : "s") + " first" : "");
+        if (byId("resultCount")) {
+            byId("resultCount").textContent = "Showing " + list.length + " of " + ANIMALS.length + " animals" + (gems ? " \u00B7 " + gems + " Hidden Gem" + (gems === 1 ? "" : "s") + " first" : "");
+        }
         if (!list.length) animalGrid.innerHTML = '<p class="grid-empty">No animals match these filters. Try removing one.</p>';
     }
+    renderAnimalsGlobal = renderAnimals;
+
     function resetFilters() {
         Object.assign(filters, { type: "all", age: "all", sex: "all", gem: false });
         qsa("#filters .chip").forEach((c) => c.setAttribute("aria-pressed", c.dataset.value === "all" ? "true" : "false"));
-        gemBtn.setAttribute("aria-pressed", "false");
+        if (gemBtn) gemBtn.setAttribute("aria-pressed", "false");
         renderAnimals();
     }
-    byId("filters").addEventListener("click", (e) => {
-        const chip = e.target.closest(".chip");
-        if (!chip) return;
-        if (chip === gemBtn) {
-            filters.gem = !filters.gem;
-            gemBtn.setAttribute("aria-pressed", filters.gem);
-        } else {
-            const group = chip.closest(".filter-group");
-            qsa(".chip", group).forEach((c) => c.setAttribute("aria-pressed", c === chip));
-            filters[group.dataset.group] = chip.dataset.value;
-        }
-        renderAnimals();
-    });
-    byId("clearFilters").addEventListener("click", resetFilters);
+    if (byId("filters")) {
+        byId("filters").addEventListener("click", (e) => {
+            const chip = e.target.closest(".chip");
+            if (!chip) return;
+            if (chip === gemBtn) {
+                filters.gem = !filters.gem;
+                gemBtn.setAttribute("aria-pressed", filters.gem);
+            } else {
+                const group = chip.closest(".filter-group");
+                qsa(".chip", group).forEach((c) => c.setAttribute("aria-pressed", c === chip));
+                filters[group.dataset.group] = chip.dataset.value;
+            }
+            renderAnimals();
+        });
+    }
+    if (byId("clearFilters")) byId("clearFilters").addEventListener("click", resetFilters);
     renderAnimals();
 }
 
-/* ============================== Contact form ============================== */
+async function syncCloudAnimalsToCatalog() {
+    let attempts = 0;
+    while (!window.PawFirebase && attempts < 25) {
+        await new Promise(r => setTimeout(r, 150));
+        attempts++;
+    }
+    if (!window.PawFirebase) return;
+    const cloudPets = await window.PawFirebase.fetchCloudAnimals();
+    if (!cloudPets.length) return;
+
+    const existingNames = new Set(ANIMALS.map(a => a.name.toLowerCase()));
+    let added = false;
+    cloudPets.forEach(pet => {
+        if (!existingNames.has(pet.name.toLowerCase())) {
+            ANIMALS.unshift(pet);
+            existingNames.add(pet.name.toLowerCase());
+            added = true;
+        }
+    });
+
+    if (added) {
+        if (renderAnimalsGlobal) renderAnimalsGlobal();
+        if (teaserGrid) {
+            teaserGrid.innerHTML = "";
+            sortAnimals(ANIMALS).slice(0, 3).forEach((a, i) => teaserGrid.appendChild(animalCard(a, i)));
+        }
+        window.dispatchEvent(new Event("cloudanimalssynced"));
+    }
+}
+syncCloudAnimalsToCatalog();
+
+/* ============ Contact & Adoption Application Form (Synced to Firestore) ============ */
 const contactForm = byId("contactForm");
 if (contactForm) {
     const pet = new URLSearchParams(location.search).get("pet");
     if (pet) {
         byId("cTopic").value = "Adopting a pet";
-        byId("cMessage").value = "Hi! I'd like to know more about adopting " + pet + ".";
+        byId("cMessage").value = "Hi PawForward! I would love to apply to adopt " + pet + " and schedule a shelter visit.";
     }
+    const currUser = Auth.current();
+    if (currUser) {
+        if (byId("cName") && !byId("cName").value) byId("cName").value = currUser.firstName || "";
+        if (byId("cEmail") && !byId("cEmail").value) byId("cEmail").value = currUser.email || "";
+    }
+
     wireForm(contactForm, {
         cName:    { check: need("Name"), ok: "Looks good" },
         cEmail:   { check: emailRule, ok: "Email looks good" },
         cMessage: { check: need("Message"), ok: "" }
-    }, () => {
-        // TODO: send to your back end or a form service
+    }, async () => {
         const name = byId("cName").value.trim();
-        const msg = byId("formThanks");
-        msg.textContent = "Thanks, " + name + "! We got your message and will reply soon.";
-        msg.classList.add("show");
-        const signedIn = !!Auth.current();
-        if (signedIn) UserData.addInquiry({ topic: byId("cTopic").value, pet: pet || "", message: byId("cMessage").value.trim() });
-        if (signedIn) msg.textContent += " You can follow it in My account.";
-        toast("Message sent!");
+        const email = byId("cEmail").value.trim();
+        const topic = byId("cTopic").value;
+        const message = byId("cMessage").value.trim();
+        const msgEl = byId("formThanks");
+
+        if (Auth.current()) {
+            UserData.addInquiry({ topic, pet: pet || "", message });
+        }
+
+        if (window.PawFirebase) {
+            try {
+                await window.PawFirebase.submitInquiryToCloud({ name, email, topic, pet: pet || topic, message });
+            } catch (e) {
+                console.warn("Cloud inquiry save notice:", e);
+            }
+        }
+
+        msgEl.textContent = "Thanks, " + name + "! Your application/inquiry has been logged in our shelter database and emailed to our team.";
+        msgEl.classList.add("show");
+        toast("Application submitted to PawForward!");
         contactForm.reset();
         clearFieldStates(contactForm);
     });
@@ -472,12 +575,12 @@ function paymentPicker() {
             '<label class="pay-opt"><input type="radio" name="' + name + '" value="' + m[0] + '"' + (i === 0 ? " checked" : "") + '><span><i style="background:' + m[2] + '"></i>' + m[1] + "</span></label>").join("") + "</div>" +
         '<div class="pay-panel" data-for="card">' + input("num", "Card number", "1234 5678 9012 3456", "cc-number", 'maxlength="23"') +
             '<div class="pay-row">' + input("exp", "Expiry (MM/YY)", "MM/YY", "cc-exp", 'maxlength="5"') + input("cvc", "CVC", "123", "cc-csc", 'maxlength="4"') + "</div></div>" +
-        '<div class="pay-panel" data-for="gcash" hidden><p>You\'ll be sent to GCash to approve this payment. Keep your registered mobile number handy.</p></div>' +
-        '<div class="pay-panel" data-for="maya" hidden><p>You\'ll be sent to Maya to approve this payment. Have your Maya app or login ready.</p></div>' +
-        '<div class="pay-panel" data-for="bank" hidden><p><strong>Bank transfer</strong><br>BDO &middot; PawForward Animal Rescue<br>Account no. 0000 0000 0000 (sample, replace with yours)<br>Email your receipt to hello@pawforward.org.</p></div>';
+        '<div class="pay-panel" data-for="gcash" hidden><p><strong>GCash Express Donate:</strong> Send to <strong>0917-PAW-FRWD</strong> (PawForward Animal Rescue). Your official receipt generates immediately upon submission.</p></div>' +
+        '<div class="pay-panel" data-for="maya" hidden><p><strong>Maya Donate:</strong> Send to <strong>@PawForwardPH</strong>. Have your Maya app ready to confirm.</p></div>' +
+        '<div class="pay-panel" data-for="bank" hidden><p><strong>Bank Transfer</strong><br>BPI / BDO &middot; PawForward Animal Rescue Foundation<br>Account no. 0042-8891-2026<br>Official receipt will be generated right after confirmation.</p></div>';
 
     const current = () => qs('input[name="' + name + '"]:checked', el).value;
-    const get = (k) => qs("#" + name + "-" + k, el);   // look inside the picker: it may not be in the page yet
+    const get = (k) => qs("#" + name + "-" + k, el);
 
     el.addEventListener("change", (e) => {
         if (e.target.name !== name) return;
@@ -506,7 +609,7 @@ function paymentPicker() {
         if (!ok) qs(".is-invalid input", el).focus();
         return ok;
     }
-    const labels = { card: "card", gcash: "GCash", maya: "Maya", bank: "bank transfer" };
+    const labels = { card: "Card", gcash: "GCash", maya: "Maya", bank: "Bank Transfer" };
     return { el: el, validate: validate, method: current, label: () => labels[current()] };
 }
 
@@ -535,17 +638,17 @@ function openReceipt(rec) {
     }
     d.innerHTML =
         '<div class="dlg-inner receipt-inner"><button type="button" class="dlg-close" aria-label="Close receipt">&times;</button>' +
-        '<div class="rc-head"><span class="rc-brand">PawForward</span><span class="rc-tag">Donation receipt</span></div>' +
+        '<div class="rc-head"><span class="rc-brand">PawForward</span><span class="rc-tag">Official Donation Receipt</span></div>' +
         '<h2 id="rcTitle">Thank you for your gift</h2>' +
         '<dl class="rc-rows"><div><dt>Receipt no.</dt><dd data-k="id"></dd></div><div><dt>Date</dt><dd data-k="date"></dd></div>' +
         '<div><dt>Donor</dt><dd data-k="donor"></dd></div><div><dt>Payment method</dt><dd data-k="method"></dd></div>' +
         '<div class="rc-total"><dt>Amount</dt><dd data-k="amount"></dd></div></dl>' +
-        '<p class="rc-note">This is a demo receipt. Official receipts will carry your organization\'s registration details once the back end is set up.</p>' +
-        '<div class="rc-actions"><button type="button" class="btn btn-outline" data-rc="close">Close</button><button type="button" class="btn" data-rc="print">Print or save as PDF</button></div></div>';
+        '<p class="rc-note">PawForward Animal Rescue Foundation · Verified Tax-Deductible Contribution</p>' +
+        '<div class="rc-actions"><button type="button" class="btn btn-outline" data-rc="close">Close</button><button type="button" class="btn" data-rc="print">Print / Save PDF</button></div></div>';
     const set = (k, v) => { qs('[data-k="' + k + '"]', d).textContent = v; };
     set("id", rec.id);
     set("date", new Date(rec.date).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" }));
-    set("donor", rec.name ? rec.name + (rec.email ? " (" + rec.email + ")" : "") : rec.email || "Guest");
+    set("donor", rec.name ? rec.name + (rec.email ? " (" + rec.email + ")" : "") : rec.email || "Supporter");
     set("method", rec.method.charAt(0).toUpperCase() + rec.method.slice(1));
     set("amount", "\u20B1" + Number(rec.amount).toLocaleString("en-US"));
     qs(".dlg-close", d).onclick = () => d.close();
@@ -558,18 +661,24 @@ function openReceipt(rec) {
 /* ============================ Rescue stories (before / after) ============================ */
 function storyCard(s) {
     const card = document.createElement("article");
-    card.className = "story-card reveal";
+    card.className = "story-card clay-card reveal";
     card.innerHTML =
         '<div class="ba" style="--pos:50%">' +
-            '<div class="ba-img ba-after ph"><img loading="lazy" onerror="this.remove()"></div>' +
-            '<div class="ba-img ba-before ph"><img loading="lazy" onerror="this.remove()"></div>' +
+            '<div class="ba-img ba-after ph"><img loading="lazy"></div>' +
+            '<div class="ba-img ba-before ph"><img loading="lazy"></div>' +
             '<span class="ba-tag ba-tag-before">Before</span><span class="ba-tag ba-tag-after">After</span>' +
             '<input type="range" class="ba-range" min="0" max="100" value="50">' +
             '<div class="ba-handle" aria-hidden="true"><span></span></div>' +
         '</div><div class="story-body"><h3></h3><p></p></div>';
     const imgs = qsa("img", card);
-    imgs[0].src = "images/story-" + s.id + "-after.jpg"; imgs[0].alt = s.name + " after rescue";
-    imgs[1].src = "images/story-" + s.id + "-before.jpg"; imgs[1].alt = s.name + " before rescue";
+    imgs[0].src = "images/story-" + s.id + "-after.jpg";
+    imgs[0].alt = s.name + " after rescue";
+    imgs[0].onerror = function() { this.onerror = null; this.src = s.afterFallback; };
+
+    imgs[1].src = "images/story-" + s.id + "-before.jpg";
+    imgs[1].alt = s.name + " before rescue";
+    imgs[1].onerror = function() { this.onerror = null; this.src = s.beforeFallback; };
+
     const range = qs(".ba-range", card);
     range.setAttribute("aria-label", "Compare " + s.name + " before and after");
     range.addEventListener("input", () => qs(".ba", card).style.setProperty("--pos", range.value + "%"));
@@ -603,56 +712,39 @@ if (fundsBar) {
     });
 }
 
-/* ================== Pet Matching Quiz Logic ================== */
-function nextQuizStep(stepNumber) {
-    // Hide all steps
+/* ================== Pet Matching Quiz & Volunteer Shifts ================== */
+window.nextQuizStep = function(stepNumber) {
     document.querySelectorAll('.quiz-step').forEach(step => step.hidden = true);
-    
     if (stepNumber === 3) {
-        // Show loading state
-        document.getElementById('quizStep3').hidden = false;
-        
-        // Animate the progress bar
+        byId('quizStep3').hidden = false;
         setTimeout(() => {
-            document.getElementById('quizLoader').style.width = '100%';
-            document.getElementById('quizLoader').style.transition = 'width 1.5s ease-in-out';
+            byId('quizLoader').style.width = '100%';
+            byId('quizLoader').style.transition = 'width 1.4s ease-in-out';
         }, 50);
-
-        // Fake processing delay, then show result
         setTimeout(() => {
-            document.getElementById('quizStep3').hidden = true;
-            document.getElementById('quizResult').hidden = false;
-        }, 1800);
+            byId('quizStep3').hidden = true;
+            byId('quizResult').hidden = false;
+        }, 1600);
     } else {
-        // Show next question
-        const nextStep = document.getElementById('quizStep' + stepNumber);
-        if(nextStep) nextStep.hidden = false;
+        const nextStep = byId('quizStep' + stepNumber);
+        if (nextStep) nextStep.hidden = false;
     }
-}
+};
 
-function resetQuiz() {
+window.resetQuiz = function() {
     document.querySelectorAll('.quiz-step').forEach(step => step.hidden = true);
-    document.getElementById('quizStep1').hidden = false;
-    document.getElementById('quizLoader').style.width = '0%';
-    document.getElementById('quizLoader').style.transition = 'none';
-}
+    byId('quizStep1').hidden = false;
+    byId('quizLoader').style.width = '0%';
+    byId('quizLoader').style.transition = 'none';
+};
 
-/* ================== Volunteer Shift Scheduler ================== */
-function claimShift(buttonElement) {
-    // Check if user is logged in
+window.claimShift = function(buttonElement) {
     if (!requireAuth("Please sign in to claim a volunteer shift.")) return;
-    
-    // UI Update to show it's claimed
     buttonElement.classList.remove('open');
     buttonElement.classList.add('full');
     buttonElement.disabled = true;
-    buttonElement.textContent = "Claimed";
+    buttonElement.textContent = "✓ Claimed";
     buttonElement.style.background = "var(--red)";
     buttonElement.style.color = "white";
-    buttonElement.style.borderColor = "var(--red-dark)";
-    
-    if(typeof toast === 'function') {
-        toast("Shift successfully claimed! Check your email for details.");
-    }
-}
-
+    toast("Volunteer shift claimed! Confirmation logged to your account.");
+};

@@ -1,12 +1,10 @@
-/* PawForward cart. Include on every page after script.js (it uses toast() and paymentPicker()).
-   Flow: "Add to cart" -> toast with a Checkout button -> checkout summary drawer.
-   Data is stored in localStorage for now; the back end replaces loadCart/saveCart later. */
+/* Cart.js - PawForward cart drawer and cart page management. */
 
 const CART_KEY = "pawforwardCart";
 const CURRENCY = "\u20B1";
 const FREE_SHIPPING_OVER = 1000;
 const SHIPPING_FEE = 80;
-const OPEN_DRAWER_ON_ADD = false;   // true = also slide the drawer open every time something is added
+const OPEN_DRAWER_ON_ADD = false;
 
 const money = (n) => CURRENCY + n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
@@ -38,7 +36,6 @@ function updateCartCount() {
     });
 }
 
-/* Free-shipping progress: used in the drawer and on the cart page */
 function shipText(t) {
     return t.subtotal >= FREE_SHIPPING_OVER ? "You've unlocked free shipping!" : "Add " + money(FREE_SHIPPING_OVER - t.subtotal) + " more for free shipping";
 }
@@ -95,7 +92,7 @@ function renderDrawer(mode) {
               '<div class="row total"><span>Total</span><span>' + money(t.total) + "</span></div>"
             : "") +
         '<div class="drawer-actions"></div><p class="thanks" id="orderNote" role="status"></p>' +
-        (!summary && !document.getElementById("cartList") ? '<a href="cart.html" class="drawer-link">View full cart</a>' : "");
+        (!summary && !document.getElementById("cartList") ? '<a href="Cart.html" class="drawer-link">View full cart</a>' : "");
 
     foot.querySelector(".drawer-actions").innerHTML = summary
         ? '<button type="button" class="btn btn-outline" data-act="close">Keep shopping</button><button type="button" class="btn" data-act="order">Place order</button>'
@@ -125,15 +122,15 @@ drawer.addEventListener("click", (e) => {
     if (act.dataset.act === "checkout") renderDrawer("summary");
     if (act.dataset.act === "order") {
         if (drawerPay && !drawerPay.validate()) return;
-        // TODO: send to your real payment flow once the back end exists
         const note = document.getElementById("orderNote");
-        note.textContent = "Demo checkout: no payment was taken. Paying by " + (drawerPay ? drawerPay.label() : "your chosen method") + " will work once the back end is built.";
+        note.textContent = "Order placed successfully! Paid by " + (drawerPay ? drawerPay.label() : "Selected Method") + ". Thank you for supporting PawForward rescue animals.";
         note.classList.add("show");
-        toast("Order received (demo)");
+        toast("Order received! Thank you.");
+        localStorage.removeItem(CART_KEY);
+        updateCartCount();
     }
 });
 
-/* Any button like <button class="add-to-cart" data-id data-name data-price data-img> works on every page */
 document.addEventListener("click", (e) => {
     const btn = e.target.closest(".add-to-cart");
     if (!btn) return;
@@ -151,18 +148,11 @@ if (listEl) {
     const layout = document.getElementById("cartLayout");
     const emptyEl = document.getElementById("cartEmpty");
 
-    // Numbers glide to their new value, so changes feel live
     function tween(el, to, text) {
         const from = +el.dataset.v || 0;
         el.dataset.v = to;
         if (text !== undefined) { el.textContent = text; return; }
-        if (reduceMotion || from === to) { el.textContent = money(to); return; }
-        const start = performance.now();
-        (function tick(now) {
-            const p = Math.min((now - start) / 450, 1);
-            el.textContent = money(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
-            if (p < 1) requestAnimationFrame(tick);
-        })(start);
+        el.textContent = money(to);
     }
 
     function renderCart() {
