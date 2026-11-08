@@ -207,22 +207,47 @@ window.PawFirebase = {
     }
 };
 
-supabase.auth.onAuthStateChange(async (event, session) => {
+// NOTE: keep this callback synchronous. Awaiting other Supabase calls (like
+// verifyAdminAccess -> supabase.from(...)) inside onAuthStateChange can deadlock
+// supabase-js, which leaves the user half signed-in. Slow work is deferred below.
+supabase.auth.onAuthStateChange((event, session) => {
     const fbUser = session?.user;
     if (fbUser) {
-        const isAdmin = await verifyAdminAccess(fbUser);
-        localStorage.setItem("paw_user_role", isAdmin ? "admin" : "user");
         const currentLocal = JSON.parse(localStorage.getItem("pawforwardSession") || "null");
         const fallbackFirst = fbUser.email.split("@")[0];
+        const cachedRole = localStorage.getItem("paw_user_role") === "admin" ? "admin" : "user";
         localStorage.setItem("pawforwardSession", JSON.stringify({
             uid: fbUser.id,
             email: fbUser.email.toLowerCase(),
             firstName: (currentLocal && currentLocal.firstName) ? currentLocal.firstName : (fallbackFirst.charAt(0).toUpperCase() + fallbackFirst.slice(1)),
-            role: isAdmin ? "admin" : "user"
+            role: cachedRole
         }));
+        window.dispatchEvent(new Event("authchange"));
+
+        // Work out the real admin role afterwards, outside the auth callback.
+        setTimeout(async () => {
+            const isAdmin = await verifyAdminAccess(fbUser);
+            const role = isAdmin ? "admin" : "user";
+            localStorage.setItem("paw_user_role", role);
+            const s = JSON.parse(localStorage.getItem("pawforwardSession") || "null");
+            if (s && s.uid === fbUser.id && s.role !== role) {
+                s.role = role;
+                localStorage.setItem("pawforwardSession", JSON.stringify(s));
+                window.dispatchEvent(new Event("authchange"));
+            }
+        }, 0);
     } else {
-        localStorage.removeItem("paw_user_role");
-        localStorage.removeItem("pawforwardSession");
+        // Only clear the stored login when Supabase says the user really signed out,
+        // or when the stored login came from Supabase (it has a uid). A code-based
+        // login is local-only (no uid) and must survive the empty INITIAL_SESSION
+        // event that fires on every page load.
+        const stored = JSON.parse(localStorage.getItem("pawforwardSession") || "null");
+        if (event === "SIGNED_OUT" || (stored && stored.uid)) {
+            localStorage.removeItem("paw_user_role");
+            localStorage.removeItem("pawforwardSession");
+            localStorage.removeItem("paw_user_email");
+            localStorage.removeItem("paw_user_name");
+        }
+        window.dispatchEvent(new Event("authchange"));
     }
-    window.dispatchEvent(new Event("authchange"));
 });

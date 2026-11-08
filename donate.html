@@ -184,6 +184,14 @@
         selected = fromUrl;
     }
 
+    const forPet = (new URLSearchParams(location.search).get("for") || "").trim().slice(0, 40);
+    if (forPet) {
+        const note = document.createElement("p");
+        note.className = "donate-impact";
+        note.textContent = "Your gift will go toward " + forPet + "\u2019s care.";
+        $("payMount").before(note);
+    }
+
     showImpact(selected);
     applyGate();
     render(0);

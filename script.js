@@ -1,11 +1,6 @@
 /* script.js - Site-wide behavior. Needs Layout.js (top of <body>) and Core.js loaded first. */
-window.addEventListener("DOMContentLoaded", () => {
-        if (typeof requireAuth !== "undefined") {
-            window.requireAuth = function(notice) {
-                return true; // Always return true so it never forces login!
-            };
-        }
-    });
+// (Removed) requireAuth() was being overridden to always return true, which let
+// signed-out visitors "save" pets / claim shifts with nothing stored.
 
 
 if (typeof Auth !== 'undefined') {
@@ -245,11 +240,12 @@ wireForm(byId("signInForm"), {
 
     try {
         if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Verifying..."; }
-        localStorage.setItem("paw_user_email", emailVal);
-        localStorage.setItem("paw_user_name", emailVal.split('@')[0]);
 
         if (window.PawFirebase) {
             const { isAdmin } = await window.PawFirebase.login(emailVal, passVal);
+            // Only remember the user once the login has actually succeeded.
+            localStorage.setItem("paw_user_email", emailVal);
+            localStorage.setItem("paw_user_name", emailVal.split('@')[0]);
             if (isAdmin) localStorage.setItem("paw_user_role", "admin");
             closeAuth();
             refreshAuth();
@@ -281,11 +277,11 @@ wireForm(byId("signUpForm"), {
 
     try {
         if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Creating account..."; }
-        localStorage.setItem("paw_user_email", emailVal);
-        localStorage.setItem("paw_user_name", emailVal.split('@')[0]);
 
         if (window.PawFirebase) {
             const { isAdmin } = await window.PawFirebase.register(emailVal, passVal);
+            localStorage.setItem("paw_user_email", emailVal);
+            localStorage.setItem("paw_user_name", emailVal.split('@')[0]);
             if (isAdmin) localStorage.setItem("paw_user_role", "admin");
             closeAuth();
             refreshAuth();
@@ -326,18 +322,24 @@ wireForm(byId("codeVerify"), { cdCode: { check: (v) => /^\d{6}$/.test(v.trim()) 
 
 refreshAuth();
 
-// Prevent unauthenticated login prompts when clicking donation elements
-document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button, a");
-    if (!btn) return;
-    const text = btn.textContent.toLowerCase();
-    if (text.includes("donate") || text.includes("bruno") || text.includes("luna")) {
-        if (!localStorage.getItem("paw_user_email")) {
-            localStorage.setItem("paw_user_email", "supporter@pawforward.org");
-            localStorage.setItem("paw_user_name", "Supporter");
-        }
+/* Donate-to-an-animal buttons (community.html). Signed in -> go straight to the
+   donate page. Signed out -> ask them to sign in, then continue automatically. */
+let pendingDonateTo = null;
+function donateTo(name) {
+    const go = () => { location.href = "donate.html?for=" + encodeURIComponent(name); };
+    if (typeof Auth !== "undefined" && Auth.current()) { go(); return; }
+    pendingDonateTo = go;
+    openAuth("Sign in to donate to " + name);
+}
+window.addEventListener("authchange", () => {
+    if (pendingDonateTo && typeof Auth !== "undefined" && Auth.current()) {
+        const go = pendingDonateTo; pendingDonateTo = null; setTimeout(go, 600);
     }
-}, true);
+});
+
+// (Removed) A click handler used to silently sign everyone in as
+// "supporter@pawforward.org" when they clicked anything containing "donate".
+// Guests now donate through the "Donate as guest" option on donate.html.
 
 /* ================== Header: solid on scroll, progress line ================== */
 const mainNav = byId("mainNav");
