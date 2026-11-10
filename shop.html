@@ -94,9 +94,17 @@
                 '<div class="buy-row"><span class="price"></span><button type="button" class="add-to-cart">' + PLUS + 'Add to cart</button></div></div>';
             
             const img = card.querySelector("img");
-            img.src = "images/shop-" + p.id + ".jpg";
+            // Try your own photo as .png, then .jpg, then the online fallback.
+            const sources = ["images/shop-" + p.id + ".png", "images/shop-" + p.id + ".jpg", p.fallback];
+            let tryIndex = 0;
             img.alt = p.name;
-            img.onerror = function() { this.onerror = null; this.src = p.fallback; };
+            img.onerror = function() {
+                tryIndex++;
+                if (tryIndex < sources.length) this.src = sources[tryIndex]; else this.onerror = null;
+            };
+            // The cart should use whichever picture actually loaded.
+            img.onload = function() { const b = card.querySelector(".add-to-cart"); if (b) b.dataset.img = this.getAttribute("src"); };
+            img.src = sources[0];
 
             card.querySelector(".tag").textContent = CAT_LABEL[p.cat];
             if (p.badge) { const f = document.createElement("span"); f.className = "flag"; f.textContent = p.badge; card.querySelector(".item-img").appendChild(f); }
@@ -104,7 +112,7 @@
             card.querySelector(".desc").textContent = p.desc;
             card.querySelector(".price").textContent = peso(p.price);
             const btn = card.querySelector(".add-to-cart");
-            btn.dataset.id = p.id; btn.dataset.name = p.name; btn.dataset.price = p.price; btn.dataset.img = "images/shop-" + p.id + ".jpg";
+            btn.dataset.id = p.id; btn.dataset.name = p.name; btn.dataset.price = p.price; btn.dataset.img = sources[0];
             btn.setAttribute("aria-label", "Add " + p.name + " to cart");
             grid.appendChild(card);
         });

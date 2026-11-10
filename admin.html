@@ -153,13 +153,47 @@
         }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
         .card-header h2 { font-size: 19px; font-weight: 800; margin: 0; }
+        .card-header .hint { font-size: 12px; color: var(--muted); max-width: 460px; text-align: right; }
         .table-wrapper { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 640px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 760px; }
         th { padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--line); }
         td { padding: 16px; font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--line); vertical-align: middle; }
         tr:hover td { background: var(--blush); }
+        tbody tr:last-child td { border-bottom: none; }
+        html { scroll-behavior: smooth; }
+        .card-container { scroll-margin-top: 100px; }
+        .nowrap { white-space: nowrap; }
+        .cell-msg { max-width: 300px; font-weight: 500; overflow-wrap: anywhere; line-height: 1.5; }
+        .cell-sub { display: block; margin-top: 2px; font-size: 12px; font-weight: 500; color: var(--muted); overflow-wrap: anywhere; }
+        .row-actions { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; }
+        .row-actions .btn { white-space: nowrap; }
+        .empty-row { text-align: center; color: var(--muted); }
+        [data-view][hidden] { display: none !important; }
+        .nav-badge { margin-left: auto; min-width: 22px; padding: 2px 7px; border-radius: 99px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; text-align: center; }
+        .attention-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .attention-card p { margin: 4px 0 0; font-size: 13px; font-weight: 500; color: var(--muted); }
+        .attention-card h2 { margin: 0; font-size: 17px; font-weight: 800; }
+        .btn-danger { background: #c92a2a; color: #fff; }
+        .btn-danger:hover { background: #a61e1e; }
+        .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+        .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+        .chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--field); color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+        .chip span { min-width: 20px; padding: 1px 6px; border-radius: 99px; background: var(--blush); color: var(--muted); font-size: 11px; text-align: center; }
+        .chip:hover { border-color: var(--red); }
+        .chip.active { background: var(--red); border-color: var(--red); color: #fff; }
+        .chip.active span { background: rgba(255,255,255,.22); color: #fff; }
+        .sort-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); }
+        .sort-wrap select { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--field); color: var(--ink); font: inherit; font-size: 12px; }
+        .more-wrap { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--muted); }
+        .modal-note { margin: -8px 0 18px; font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--muted); }
+        .toast-wrap { position: fixed; right: 20px; bottom: 20px; z-index: 6000; display: flex; flex-direction: column; gap: 10px; max-width: min(380px, calc(100vw - 40px)); }
+        .toast { padding: 13px 16px; border-radius: 14px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid #087f5b; box-shadow: 0 12px 30px rgba(0,0,0,.35); font-size: 13px; font-weight: 600; line-height: 1.45; animation: toastIn .25s ease; }
+        .toast.error { border-left-color: #c92a2a; }
+        .toast.warn { border-left-color: var(--gold); }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .reviewed-note { font-size: 11px; font-weight: 600; color: var(--muted); margin-right: 4px; }
 
-        .status-pill { padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block; }
+        .status-pill { padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block; white-space: nowrap; }
         .status-pending { background: #fff8e6; color: #b45d00; }
         .status-approved { background: #e6fcf5; color: #087f5b; }
         .status-rejected { background: #ffe3e3; color: #c92a2a; }
@@ -201,7 +235,7 @@
 <div id="securityShield">
     <div class="spinner" id="shieldSpinner"></div>
     <h2 id="shieldTitle" style="margin:0;">Verifying Creator & Admin Credentials...</h2>
-    <p id="shieldSub" style="color:var(--muted);max-width:440px;margin:0;">Checking Firebase Authentication & Creator Whitelist permissions.</p>
+    <p id="shieldSub" style="color:var(--muted);max-width:440px;margin:0;">Checking Supabase Authentication & Creator Whitelist permissions.</p>
 </div>
 
 <div class="admin-layout">
@@ -215,7 +249,7 @@
         
         <nav class="admin-nav">
             <a href="#overview" class="active">📊 Dashboard Overview</a>
-            <a href="#applicationsSection">📝 Adoption Pipeline</a>
+            <a href="#applicationsSection">📝 Adoption Pipeline <span class="nav-badge" id="pendingBadge" hidden></span></a>
             <a href="#registrySection">🐾 Cloud Pet Registry</a>
             <a href="#mailLogsSection">✉️ Email Notification Log</a>
             <div class="nav-divider"></div>
@@ -229,7 +263,7 @@
         <header class="admin-header">
             <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">&#9776;</button>
             <div class="header-search">
-                <input type="text" id="adminSearchInput" placeholder="Filter applications, pets, or email logs...">
+                <input type="text" id="adminSearchInput" placeholder="Filter the list on this page...">
             </div>
             <div class="admin-header-right">
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">🌓</button>
@@ -241,16 +275,16 @@
         </header>
 
         <div class="admin-content" id="overview">
-            <div class="page-title">
+            <div class="page-title" data-view="overview">
                 <div>
                     <h1>Shelter Command Center</h1>
-                    <p style="color:var(--muted);margin:4px 0 0;font-size:14px;">Real-time Firestore sync for rescues, adoption inquiries, and automated emails.</p>
+                    <p style="color:var(--muted);margin:4px 0 0;font-size:14px;">Live Supabase sync for rescues, adoption inquiries, and automated emails.</p>
                 </div>
                 <button class="btn btn-primary" id="openModalBtn">+ Register New Rescue Pet</button>
             </div>
 
             <!-- Live Stats -->
-            <div class="stats-grid">
+            <div class="stats-grid" data-view="overview">
                 <div class="stat-card">
                     <div class="stat-icon">🐾</div>
                     <div class="stat-info">
@@ -274,11 +308,33 @@
                 </div>
             </div>
 
+            <div class="card-container attention-card" data-view="overview">
+                <div>
+                    <h2 id="attentionTitle">Checking applications...</h2>
+                    <p id="attentionSub">Pending adoption inquiries will show up here.</p>
+                </div>
+                <a href="#applicationsSection" class="btn btn-primary">Open Adoption Pipeline</a>
+            </div>
+
             <!-- Live Adoption Applications Pipeline -->
-            <div class="card-container" id="applicationsSection">
+            <div class="card-container" id="applicationsSection" data-view="applicationsSection">
                 <div class="card-header">
                     <h2>Adoption & Shelter Inquiries Pipeline</h2>
-                    <span style="font-size:12px;color:var(--muted);">Approve or Decline to update Firestore & trigger applicant email notification</span>
+                    <span class="hint">Approve or Decline to update the status and log a notification to the applicant</span>
+                </div>
+                <div class="toolbar">
+                    <div class="chips" id="inqChips">
+                        <button type="button" class="chip active" data-filter="all">All <span>0</span></button>
+                        <button type="button" class="chip" data-filter="Pending Review">Pending <span>0</span></button>
+                        <button type="button" class="chip" data-filter="Approved">Approved <span>0</span></button>
+                        <button type="button" class="chip" data-filter="Rejected">Declined <span>0</span></button>
+                    </div>
+                    <label class="sort-wrap">Sort
+                        <select id="inqSort">
+                            <option value="newest">Newest first</option>
+                            <option value="oldest">Oldest first</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -293,17 +349,20 @@
                             </tr>
                         </thead>
                         <tbody id="inquiriesTableBody">
-                            <tr><td colspan="6" style="text-align:center;color:var(--muted);">Loading live inquiries from Firestore...</td></tr>
+                            <tr><td colspan="6" class="empty-row">Loading live inquiries...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Live Cloud Animals Registry -->
-            <div class="card-container" id="registrySection">
+            <div class="card-container" id="registrySection" data-view="registrySection">
                 <div class="card-header">
-                    <h2>Cloud Animal Registry (Firestore `animals`)</h2>
-                    <span style="font-size:12px;color:var(--muted);">Synced live with adopt.html</span>
+                    <h2>Cloud Animal Registry</h2>
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                        <span class="hint">Synced live with adopt.html</span>
+                        <button class="btn btn-primary btn-sm" id="openModalBtn2" type="button">+ Register New Rescue Pet</button>
+                    </div>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -317,17 +376,17 @@
                             </tr>
                         </thead>
                         <tbody id="animalsTableBody">
-                            <tr><td colspan="5" style="text-align:center;color:var(--muted);">Loading cloud animals...</td></tr>
+                            <tr><td colspan="5" class="empty-row">Loading cloud animals...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Automated Email Dispatch Audit Log -->
-            <div class="card-container" id="mailLogsSection">
+            <div class="card-container" id="mailLogsSection" data-view="mailLogsSection">
                 <div class="card-header">
-                    <h2>Automated Email Notification Logs (Firestore `mail_logs`)</h2>
-                    <span style="font-size:12px;color:var(--muted);">Every signup, inquiry, and status update is logged here</span>
+                    <h2>Automated Email Notification Logs</h2>
+                    <span class="hint">Every signup, inquiry, and status update is logged here</span>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -340,14 +399,35 @@
                             </tr>
                         </thead>
                         <tbody id="mailLogsTableBody">
-                            <tr><td colspan="4" style="text-align:center;color:var(--muted);">Loading email notification logs...</td></tr>
+                            <tr><td colspan="4" class="empty-row">Loading email notification logs...</td></tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="more-wrap">
+                    <span id="logsCount"></span>
+                    <button type="button" class="btn btn-ghost btn-sm" id="logsMoreBtn" hidden>Show more</button>
                 </div>
             </div>
         </div>
     </main>
 </div>
+
+<!-- Decline confirmation -->
+<div class="modal-overlay" id="declineModal">
+    <div class="modal-card">
+        <h2>Decline this application?</h2>
+        <p class="modal-note" id="declineText"></p>
+        <div class="form-group">
+            <label for="declineReason">Reason for the applicant (optional)</label>
+            <textarea id="declineReason" rows="3" maxlength="300" placeholder="e.g. This pet has already been adopted. Please check our other animals!"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="declineCancel">Cancel</button>
+            <button type="button" class="btn btn-danger" id="declineConfirm">Decline application</button>
+        </div>
+    </div>
+</div>
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
 <!-- Add Pet Modal -->
 <div class="modal-overlay" id="animalModal">
@@ -407,7 +487,27 @@
 </div>
 
 <script type="module">
-    import { supabase, verifyAdminAccess, sendAutomatedEmail } from "./firebase-config.js";
+    import { supabase, verifyAdminAccess, sendAutomatedEmail, EMAIL_CONFIG } from "./firebase-config.js";
+
+    // Anything a visitor typed (names, messages...) must be escaped before going into innerHTML,
+    // otherwise HTML in a contact-form message would run inside the admin's browser.
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+    function toast(message, kind = "ok") {
+        const el = document.createElement("div");
+        el.className = "toast" + (kind === "ok" ? "" : " " + kind);
+        el.textContent = message;
+        document.getElementById("toastWrap").appendChild(el);
+        setTimeout(() => el.remove(), kind === "error" ? 7000 : 4500);
+    }
+
+    // Pending-review count: sidebar badge + the "needs attention" card on the overview.
+    function setPending(n) {
+        const badge = document.getElementById("pendingBadge");
+        badge.textContent = n; badge.hidden = n === 0;
+        document.getElementById("attentionTitle").textContent = n === 0 ? "You're all caught up" : n + (n === 1 ? " application is" : " applications are") + " waiting for review";
+        document.getElementById("attentionSub").textContent = n === 0 ? "No adoption inquiries are pending right now." : "Approve or decline them in the Adoption Pipeline.";
+    }
 
     const shield = document.getElementById("securityShield");
     const shieldTitle = document.getElementById("shieldTitle");
@@ -430,7 +530,7 @@
         if (!isAllowed) {
             shieldSpinner.style.display = "none";
             shieldTitle.textContent = "Access Restricted";
-            shieldSub.innerHTML = `Signed in as <strong>${user.email}</strong>, which is not on the Creator/Admin Whitelist.<br><br><a href='index.html' class='btn btn-primary'>Return to Home</a>`;
+            shieldSub.innerHTML = `Signed in as <strong>${esc(user.email)}</strong>, which is not on the Creator/Admin Whitelist.<br><br><a href='index.html' class='btn btn-primary'>Return to Home</a>`;
             return;
         }
 
@@ -451,11 +551,115 @@
             localStorage.removeItem("pawforwardSession");
             window.location.href = "index.html";
         } catch (error) {
-            alert("Sign out error: " + error.message);
+            toast("Sign out error: " + error.message, "error");
         }
     };
 
     // 3. Load Live Inquiries, Cloud Pets & Email Logs from Supabase
+    let allInquiries = [];
+    let inqFilter = "all";
+    let allLogs = [];
+    let logsShown = 12;
+
+    const statusOf = (q) => q.status || "Pending Review";
+    const errorRow = (cols, what) => `<tr><td colspan="${cols}" class="empty-row">Couldn't load ${what}. <button type="button" class="btn btn-sm btn-ghost" data-retry>Try again</button></td></tr>`;
+    // Rows are rebuilt on every filter/refresh, so re-apply whatever is typed in the search box.
+    function applySearch(tbodyId) {
+        const q = document.getElementById("adminSearchInput").value.toLowerCase();
+        if (!q) return;
+        document.querySelectorAll("#" + tbodyId + " tr").forEach((row) => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+        });
+    }
+
+    function renderInquiries() {
+        const body = document.getElementById("inquiriesTableBody");
+
+        // chip counts
+        const counts = { all: allInquiries.length, "Pending Review": 0, Approved: 0, Rejected: 0 };
+        allInquiries.forEach((q) => { const st = statusOf(q); if (st in counts) counts[st]++; });
+        document.querySelectorAll("#inqChips .chip").forEach((chip) => {
+            chip.querySelector("span").textContent = counts[chip.dataset.filter] ?? 0;
+            chip.classList.toggle("active", chip.dataset.filter === inqFilter);
+        });
+
+        if (allInquiries.length === 0) {
+            body.innerHTML = `
+                <tr>
+                    <td><strong>Maria Santos</strong><span class="cell-sub">maria.santos@email.ph</span></td>
+                    <td>Bantay (Dog)</td>
+                    <td class="cell-msg">Hi! We have a fenced yard and would love to meet Bantay.</td>
+                    <td class="nowrap">Oct 24, 2026</td>
+                    <td><span class="status-pill status-pending">Pending Review</span></td>
+                    <td><span class="cell-sub">Sample record. Submit the Contact form to test live.</span></td>
+                </tr>`;
+            return;
+        }
+
+        const dir = document.getElementById("inqSort").value === "oldest" ? 1 : -1;
+        const list = allInquiries
+            .filter((q) => inqFilter === "all" || statusOf(q) === inqFilter)
+            .sort((a, b) => dir * (new Date(a.createdAt || 0) - new Date(b.createdAt || 0)));
+
+        if (list.length === 0) {
+            body.innerHTML = '<tr><td colspan="6" class="empty-row">No applications match this filter.</td></tr>';
+            return;
+        }
+
+        body.innerHTML = "";
+        list.forEach((q) => {
+            const st = statusOf(q);
+            const pillClass = st === "Approved" ? "status-approved" : st === "Rejected" ? "status-rejected" : "status-pending";
+            const pillText = st === "Rejected" ? "Declined" : st;
+            const dateStr = q.createdAt ? new Date(q.createdAt).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : "Recent";
+            const attrs = `data-id="${esc(q.id)}" data-email="${esc(q.email)}" data-name="${esc(q.name)}" data-pet="${esc(q.pet || q.topic)}"`;
+            const approveBtn = `<button class="btn btn-sm btn-approve" ${attrs} data-act="Approved">Approve</button>`;
+            const declineBtn = `<button class="btn btn-sm btn-reject" ${attrs} data-act="Rejected">Decline</button>`;
+            // Pending: both choices. Already decided: only offer the opposite decision.
+            const actions = st === "Approved" ? `<span class="reviewed-note">Reviewed</span>${declineBtn}`
+                          : st === "Rejected" ? `<span class="reviewed-note">Reviewed</span>${approveBtn}`
+                          : approveBtn + declineBtn;
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${esc(q.name || "Applicant")}</strong><span class="cell-sub">${esc(q.email)}</span></td>
+                <td>${esc(q.pet || q.topic || "General")}</td>
+                <td class="cell-msg">${esc(q.message)}</td>
+                <td class="nowrap">${esc(dateStr)}</td>
+                <td><span class="status-pill ${pillClass}">${esc(pillText)}</span></td>
+                <td><div class="row-actions">${actions}</div></td>
+            `;
+            body.appendChild(tr);
+        });
+        applySearch("inquiriesTableBody");
+    }
+
+    function renderLogs() {
+        const body = document.getElementById("mailLogsTableBody");
+        const moreBtn = document.getElementById("logsMoreBtn");
+        const count = document.getElementById("logsCount");
+        if (allLogs.length === 0) {
+            body.innerHTML = '<tr><td colspan="4" class="empty-row">No automated emails triggered yet.</td></tr>';
+            moreBtn.hidden = true; count.textContent = "";
+            return;
+        }
+        body.innerHTML = "";
+        allLogs.slice(0, logsShown).forEach((m) => {
+            const dt = m.createdAt ? new Date(m.createdAt).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${esc(m.to_name || "User")}</strong><span class="cell-sub">${esc(m.to_email)}</span></td>
+                <td class="cell-msg">${esc(m.subject)}</td>
+                <td class="cell-msg" style="color:var(--muted);">${esc(m.message)}</td>
+                <td class="nowrap">${esc(dt)}</td>
+            `;
+            body.appendChild(tr);
+        });
+        const shown = Math.min(logsShown, allLogs.length);
+        count.textContent = `Showing ${shown} of ${allLogs.length}`;
+        moreBtn.hidden = shown >= allLogs.length;
+        applySearch("mailLogsTableBody");
+    }
+
     async function loadDashboardData() {
         const raised = Number(localStorage.getItem("pawforwardRaised")) || 34000;
         document.getElementById("statDonations").textContent = "₱" + raised.toLocaleString();
@@ -465,122 +669,132 @@
         try {
             const { data: animals, error } = await supabase.from("animals").select("*");
             if (error) throw error;
-            
+
             document.getElementById("statTotalPets").textContent = (animals?.length || 0) + 9; // Cloud + 9 Base pets
             animalsBody.innerHTML = "";
-            
+
             if (!animals || animals.length === 0) {
-                animalsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No custom cloud pets added yet. Click "+ Register New Rescue Pet" above!</td></tr>';
+                animalsBody.innerHTML = '<tr><td colspan="5" class="empty-row">No custom cloud pets added yet. Click "+ Register New Rescue Pet" above!</td></tr>';
             } else {
                 animals.forEach((pet) => {
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td><strong>${pet.name || "Unnamed"}</strong></td>
-                        <td>${pet.type || "Dog"} · ${pet.sex || "Male"}</td>
-                        <td>${pet.ageMonths || 12} mos</td>
-                        <td><span class="status-pill ${pet.status === 'Available' ? 'status-approved' : 'status-pending'}">${pet.status || "Available"}</span></td>
-                        <td><button class="btn btn-sm btn-reject" data-del-pet="${pet.id}">Remove</button></td>
+                        <td><strong>${esc(pet.name || "Unnamed")}</strong></td>
+                        <td>${esc(pet.type || "Dog")} · ${esc(pet.sex || "Male")}</td>
+                        <td class="nowrap">${esc(pet.ageMonths || 12)} mos</td>
+                        <td><span class="status-pill ${pet.status === 'Available' ? 'status-approved' : 'status-pending'}">${esc(pet.status || "Available")}</span></td>
+                        <td><div class="row-actions"><button class="btn btn-sm btn-reject" data-del-pet="${esc(pet.id)}">Remove</button></div></td>
                     `;
                     animalsBody.appendChild(tr);
                 });
+                applySearch("animalsTableBody");
             }
         } catch (e) {
             console.warn(e);
+            animalsBody.innerHTML = errorRow(5, "the pet registry");
         }
 
         // Load Live Adoption Inquiries
-        const inqBody = document.getElementById("inquiriesTableBody");
         try {
             const { data: inquiries, error } = await supabase.from("inquiries").select("*").order("createdAt", { ascending: false });
             if (error) throw error;
-
-            document.getElementById("statTotalApps").textContent = inquiries?.length || 2;
-            inqBody.innerHTML = "";
-
-            if (!inquiries || inquiries.length === 0) {
-                inqBody.innerHTML = `
-                    <tr>
-                        <td><strong>Maria Santos</strong><br><small style="color:var(--muted)">maria.santos@email.ph</small></td>
-                        <td>Bantay (Dog)</td>
-                        <td>Hi! We have a fenced yard and would love to meet Bantay.</td>
-                        <td>Oct 24, 2026</td>
-                        <td><span class="status-pill status-pending">Pending Review</span></td>
-                        <td><span style="font-size:12px;color:var(--muted);">Sample Record (Submit form on Contact page to test live)</span></td>
-                    </tr>
-                `;
-            } else {
-                inquiries.forEach((q) => {
-                    const st = q.status || "Pending Review";
-                    const pillClass = st === "Approved" ? "status-approved" : st === "Rejected" ? "status-rejected" : "status-pending";
-                    const dateStr = q.createdAt ? new Date(q.createdAt).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : "Recent";
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td><strong>${q.name || "Applicant"}</strong><br><small style="color:var(--muted)">${q.email || ""}</small></td>
-                        <td>${q.pet || q.topic || "General"}</td>
-                        <td style="max-width:260px;font-weight:500;">${q.message || ""}</td>
-                        <td>${dateStr}</td>
-                        <td><span class="status-pill ${pillClass}">${st}</span></td>
-                        <td style="display:flex;gap:6px;">
-                            <button class="btn btn-sm btn-approve" data-id="${q.id}" data-email="${q.email || ''}" data-name="${q.name || ''}" data-pet="${q.pet || ''}" data-act="Approved">Approve</button>
-                            <button class="btn btn-sm btn-reject" data-id="${q.id}" data-email="${q.email || ''}" data-name="${q.name || ''}" data-pet="${q.pet || ''}" data-act="Rejected">Decline</button>
-                        </td>
-                    `;
-                    inqBody.appendChild(tr);
-                });
-            }
+            allInquiries = inquiries || [];
+            document.getElementById("statTotalApps").textContent = allInquiries.length;
+            setPending(allInquiries.filter((q) => statusOf(q) === "Pending Review").length);
+            renderInquiries();
         } catch (e) {
             console.warn(e);
+            document.getElementById("inquiriesTableBody").innerHTML = errorRow(6, "applications");
+            document.getElementById("attentionTitle").textContent = "Couldn't load applications";
+            document.getElementById("attentionSub").textContent = "Open the Adoption Pipeline and try again.";
         }
 
         // Load Email Notification Logs
-        const mailBody = document.getElementById("mailLogsTableBody");
         try {
             const { data: logs, error } = await supabase.from("mail_logs").select("*").order("createdAt", { ascending: false });
             if (error) throw error;
-
-            mailBody.innerHTML = "";
-            if (!logs || logs.length === 0) {
-                mailBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);">No automated emails triggered yet.</td></tr>';
-            } else {
-                logs.slice(0, 12).forEach((m) => {
-                    const tr = document.createElement("tr");
-                    const dt = m.createdAt ? new Date(m.createdAt).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
-                    tr.innerHTML = `
-                        <td><strong>${m.to_name || "User"}</strong><br><small style="color:var(--muted)">${m.to_email || ""}</small></td>
-                        <td>${m.subject || ""}</td>
-                        <td style="max-width:300px;font-weight:500;color:var(--muted);">${m.message || ""}</td>
-                        <td>${dt}</td>
-                    `;
-                    mailBody.appendChild(tr);
-                });
-            }
+            allLogs = logs || [];
+            renderLogs();
         } catch (e) {
             console.warn(e);
+            document.getElementById("mailLogsTableBody").innerHTML = errorRow(4, "the email log");
         }
     }
 
-    // Handle Approve / Reject Application + Send Email Alert
+    // Retry buttons on error rows
+    document.addEventListener("click", (e) => { if (e.target.closest("[data-retry]")) loadDashboardData(); });
+
+    // Pipeline filter chips + sort
+    document.getElementById("inqChips").addEventListener("click", (e) => {
+        const chip = e.target.closest(".chip");
+        if (!chip) return;
+        inqFilter = chip.dataset.filter;
+        renderInquiries();
+    });
+    document.getElementById("inqSort").addEventListener("change", renderInquiries);
+
+    // Email log: show 12 more at a time
+    document.getElementById("logsMoreBtn").addEventListener("click", () => { logsShown += 12; renderLogs(); });
+
+    // Approve / Decline. Approve goes straight through; Decline asks for confirmation first.
+    // Real email sending is switched off in firebase-config.js (EMAIL_CONFIG.enabled), so until
+    // EmailJS is set up the "email" is only recorded in the Email Log. Say so instead of implying otherwise.
+    async function setInquiryStatus(d, act, reason = "") {
+        const verdict = act === "Rejected" ? "declined" : "approved";
+        const { error } = await supabase.from("inquiries").update({ status: act }).eq("id", d.id);
+        if (error) throw error;
+        const note = reason ? ` A note from our team: ${reason}` : "";
+        let emailOk = true;
+        try {
+            await sendAutomatedEmail({
+                to_email: d.email,
+                to_name: d.name,
+                subject: `PawForward Application Update: ${d.pet} (${verdict})`,
+                message: `Hi ${d.name}, your adoption application for ${d.pet} has been reviewed and ${verdict} by our shelter team.${note} Log in to your PawForward account portal to view details.`
+            });
+        } catch (err) { emailOk = false; }
+        await loadDashboardData();
+        if (!emailOk) toast(`Application ${verdict}, but the notification could not be recorded.`, "warn");
+        else if (EMAIL_CONFIG.enabled) toast(`Application ${verdict}. The applicant has been emailed.`);
+        else toast(`Application ${verdict}. Notification saved to the Email Log (real email sending isn't set up yet).`, "warn");
+    }
+
+    let declineTarget = null;
+    const declineModal = document.getElementById("declineModal");
+    function closeDecline() { declineModal.classList.remove("active"); declineTarget = null; document.getElementById("declineReason").value = ""; }
+
     document.getElementById("inquiriesTableBody").addEventListener("click", async (e) => {
         const btn = e.target.closest("button[data-act]");
         if (!btn) return;
-        const { id, act, email, name, pet } = btn.dataset;
-        btn.disabled = true;
-        btn.textContent = "Updating...";
-
-        try {
-            const { error } = await supabase.from("inquiries").update({ status: act }).eq("id", id);
-            if (error) throw error;
-
-            await sendAutomatedEmail({
-                to_email: email,
-                to_name: name,
-                subject: `PawForward Application Update: ${pet} (${act})`,
-                message: `Hi ${name}, your adoption application for ${pet} has been reviewed and marked as ${act} by our shelter team! Log in to your PawForward account portal to view details.`
-            });
-            await loadDashboardData();
-        } catch (err) {
-            alert("Could not update application: " + err.message);
+        if (btn.dataset.act === "Rejected") {
+            declineTarget = { ...btn.dataset };
+            document.getElementById("declineText").textContent =
+                `${btn.dataset.name || "This applicant"}'s application for ${btn.dataset.pet || "a pet"} will be marked as declined.` +
+                (EMAIL_CONFIG.enabled ? " They will be emailed." : " A notification is saved to the Email Log.");
+            declineModal.classList.add("active");
+            document.getElementById("declineReason").focus();
+            return;
         }
+        const originalLabel = btn.textContent;
+        btn.disabled = true; btn.textContent = "Updating...";
+        try { await setInquiryStatus({ ...btn.dataset }, btn.dataset.act); }
+        catch (err) { toast("Could not update application: " + err.message, "error"); btn.disabled = false; btn.textContent = originalLabel; }
+    });
+
+    document.getElementById("declineCancel").addEventListener("click", closeDecline);
+    document.getElementById("declineConfirm").addEventListener("click", async () => {
+        if (!declineTarget) return;
+        const confirmBtn = document.getElementById("declineConfirm");
+        const reason = document.getElementById("declineReason").value.trim();
+        confirmBtn.disabled = true; confirmBtn.textContent = "Declining...";
+        try { await setInquiryStatus(declineTarget, "Rejected", reason); closeDecline(); }
+        catch (err) { toast("Could not update application: " + err.message, "error"); }
+        finally { confirmBtn.disabled = false; confirmBtn.textContent = "Decline application"; }
+    });
+
+    // Esc closes any open pop-up
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") document.querySelectorAll(".modal-overlay.active").forEach((m) => m.classList.remove("active"));
     });
 
     // Handle Delete Pet
@@ -593,7 +807,7 @@
             if (error) throw error;
             await loadDashboardData();
         } catch (err) {
-            alert("Error removing pet: " + err.message);
+            toast("Could not remove pet: " + err.message, "error");
         }
     });
 
@@ -612,9 +826,32 @@
         sidebar.classList.toggle("open");
     });
 
+    document.addEventListener("click", (e) => {
+        if (sidebar.classList.contains("open") && !sidebar.contains(e.target)) sidebar.classList.remove("open");
+    });
+    // Each sidebar link shows only its own page. The page is remembered in the URL (#name),
+    // so refresh and the browser's back button keep working.
+    const VIEWS = ["overview", "applicationsSection", "registrySection", "mailLogsSection"];
+    const navLinks = document.querySelectorAll(".admin-nav a[href^='#']");
+    const searchInput = document.getElementById("adminSearchInput");
+    function showView() {
+        const name = location.hash.slice(1);
+        const view = VIEWS.includes(name) ? name : "overview";
+        document.querySelectorAll("[data-view]").forEach((el) => { el.hidden = el.dataset.view !== view; });
+        navLinks.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + view));
+        searchInput.value = "";
+        searchInput.parentElement.style.visibility = view === "overview" ? "hidden" : "visible";
+        document.querySelectorAll("tbody tr").forEach((row) => { row.style.display = ""; });
+        sidebar.classList.remove("open");
+        window.scrollTo(0, 0);
+    }
+    window.addEventListener("hashchange", showView);
+    showView();
+
     // Modal & Add Pet Form
     const modal = document.getElementById("animalModal");
     document.getElementById("openModalBtn").addEventListener("click", () => modal.classList.add("active"));
+    document.getElementById("openModalBtn2").addEventListener("click", () => modal.classList.add("active"));
     document.getElementById("closeModalBtn").addEventListener("click", () => modal.classList.remove("active"));
 
     document.getElementById("addAnimalForm").addEventListener("submit", async (e) => {
@@ -642,7 +879,7 @@
             modal.classList.remove("active");
             await loadDashboardData();
         } catch (error) {
-            alert("Database error: " + error.message);
+            toast("Database error: " + error.message, "error");
         } finally {
             saveBtn.textContent = "Save to Cloud Registry";
             saveBtn.disabled = false;

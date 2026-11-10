@@ -162,6 +162,63 @@
         }
         .slot-main { font-size: 13px; font-weight: 700; }
         .slot-sub { font-size: 11px; font-weight: 600; color: #7a6e6e; }
+
+        /* Buttons don't inherit text color by default, so set it explicitly. */
+        .date-pill, .time-slot-card { color: var(--ink, #2d2424); font-family: inherit; }
+        .contact-form .field input::placeholder, .contact-form .field textarea::placeholder { color: #8a7d7d; opacity: 1; }
+
+        /* ===== Dark mode =====
+           The light-mode rules above hard-code white/cream backgrounds, which
+           left light text on a light background once the theme switched. */
+        [data-theme="dark"] .contact-form .field input[type="text"],
+        [data-theme="dark"] .contact-form .field input[type="email"],
+        [data-theme="dark"] .contact-form .field input[type="date"],
+        [data-theme="dark"] .contact-form .field select,
+        [data-theme="dark"] .contact-form .field textarea {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+            border-color: rgba(255, 255, 255, 0.14);
+            box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.35);
+        }
+        [data-theme="dark"] .contact-form .field input::placeholder,
+        [data-theme="dark"] .contact-form .field textarea::placeholder { color: var(--muted); }
+        [data-theme="dark"] .contact-form .field input:focus,
+        [data-theme="dark"] .contact-form .field select:focus,
+        [data-theme="dark"] .contact-form .field textarea:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--red);
+            box-shadow: 0 0 0 4px rgba(200, 68, 68, 0.25);
+        }
+        [data-theme="dark"] .contact-form .field select option { background: var(--surface); color: var(--ink); }
+
+        [data-theme="dark"] .scheduler-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: none;
+        }
+        [data-theme="dark"] .scheduler-section-title,
+        [data-theme="dark"] .custom-date-wrapper label,
+        [data-theme="dark"] .slot-sub { color: var(--muted); }
+
+        [data-theme="dark"] .date-pill,
+        [data-theme="dark"] .time-slot-card {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+        [data-theme="dark"] .date-pill:hover,
+        [data-theme="dark"] .time-slot-card:hover:not(:disabled) {
+            background: rgba(200, 68, 68, 0.2);
+            border-color: var(--red);
+        }
+        [data-theme="dark"] .time-slot-card:disabled { background: rgba(255, 255, 255, 0.03); opacity: 0.45; }
+        [data-theme="dark"] .date-pill.selected,
+        [data-theme="dark"] .time-slot-card.selected {
+            background: #b63737;
+            color: #ffffff;
+            border-color: #b63737;
+        }
+        [data-theme="dark"] .time-slot-card.selected .slot-sub { color: rgba(255, 255, 255, 0.85); }
     </style>
 </head>
 <body>
